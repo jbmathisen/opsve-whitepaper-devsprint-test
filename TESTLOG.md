@@ -36,6 +36,8 @@ Responses to S5–S7. These change what Devsprinter is: from "a Claude Code plug
 | R4 | Tasks can have several people (reviews need 2+), and the board shows *waiting on whom*. | S6, S7, S12 | export |
 | R5 | **The usual contribution is a PR from a fork**: the repo is shared openly in the Discord, contributors have no write access, and the sprintmaster approves PRs. The board must show linked PRs as *in review, waiting on the sprintmaster*. Today it ignores PRs completely. | S5 | export |
 
+| R6 | **Safe AI review of PRs from strangers.** The sprintmaster wants to review PRs with their own AI. Text in a fork's PR (diff, description, HTML comments, hidden text, file names) can carry instructions to that AI. A checked-out branch can also change `CLAUDE.md`, `AGENTS.md`, `.claude/settings.json` (hooks run code) and `.github/workflows/`. Devsprinter's setup should add `CODEOWNERS` for those paths, offer a read-only check that flags hidden text and changes outside content files, and its review instructions should read PRs with `gh pr diff`, never by checking them out. | export |
+
 Proposal for R1–R5: `docs/proposal-open-sprint.md` in the Devsprinter repo.
 
 ## Sprint
