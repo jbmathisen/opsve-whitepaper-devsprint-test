@@ -40,7 +40,9 @@ Responses to S5–S7. These change what Devsprinter is: from "a Claude Code plug
 
 | R7 | **Trust profiles in setup.** Public or private, and trusted, known or open contributors, with a plain explanation of each and the settings that follow. The owner decides how much to trust people, and can raise named people. The safety notice for PR review is always included, not something to remember. The goal is a smooth start and a smooth sprint. | export |
 
-Proposal for R1–R7: `docs/proposal-open-sprint.md` in the Devsprinter repo.
+| R8 | **No commands to learn.** Contributors ask their own model what is available, what they can review and what's going on. They pick a task, the model does the work, and it delivers through a comment or a PR. The commands become something the model does for them. This is how it felt in the hackathon project that Devsprinter comes from. Goals: a better overview (a dashboard view), and use beyond code, for content too. | export |
+
+Proposal for R1–R8: `docs/proposal-open-sprint.md` in the Devsprinter repo.
 
 ## Sprint
 
@@ -59,6 +61,11 @@ Proposal for R1–R7: `docs/proposal-open-sprint.md` in the Devsprinter repo.
 | F9 | ⚠️ | 11-21 | Changes made with the Action's own token (assign, label) start no new run. That avoids loops, but `/ready` showed the task as "Not ready yet" until the next event. Fixed: the board applies the label in the same run. | export |
 | F10 | ⚠️ | 11-21 | PR reviews (approve, changes requested) don't start the board: `pull_request_review` from a fork gets a read-only token. The hourly run catches them, so *changes asked* can lag up to an hour. | export |
 | F11 | 💡 | 11-21 | The sprintmaster's own PR says "waiting on @jbmathisen", i.e. on themself. It should say "ready to merge". | export |
+| F13 | ✅ | 11-21 | **R8 built: `devsprinter/sprint.py`** (start, tasks, review, status, show, take, join, wait, back, release, deliver as a comment or a PR), **`AGENTS.md` as a conversation playbook**, and a `sprint` skill in the plugin for Claude Code. The README tells contributors to "talk to your AI", with typed commands as the fallback. | |
+| F14 | ✅ | 11-21 | **Live:** `start`, `tasks` and `review` give short, groupable answers a model can retell (your tasks, waiting on you, free, review tasks, decisions). `take 19` → assigned and 🙋 on the board. A second `take 19` → "You already have #19" right away, because the tool reads the comments itself and doesn't wait for the Action. `release 19` → free again. | |
+| F15 | ⚠️ | 11-21 | **The real test of fluency is still open:** a fresh model asked only "Vad finns att göra?" in the repo. Headless `claude -p` couldn't log in here ("OAuth session expired"). Next: the sprintmaster tries it in their own session, then the first contributor tries it with another tool (Codex or Cursor). | |
+| F16 | ⚠️ | 11-21 | One full test run had 1 error that didn't repeat in three reruns. Probably the local dashboard server tests (ports). Watch for it. | |
+| F17 | 💡 | 11-21 | Not built yet: `deliver --pr` from a fork hasn't run live (it needs a contributor with a fork). The plugin's progress hooks post to `origin`, which is the fork in a fork clone, not the sprint repo. They should follow the same parent rule as `sprint.py`. | export |
 | F12 | ⏳ | 11-21 | **Not tested yet, needs a second account or the first contributor:** a refused `/claim`, assigning someone who isn't a collaborator, `/join`, `/ready`, a PR from a fork, and the check failing for someone who isn't trusted. | |
 
 ## Wrap-up
