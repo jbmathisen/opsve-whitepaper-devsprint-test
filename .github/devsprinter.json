@@ -5,7 +5,8 @@
   "sprintmasters": ["jbmathisen"],
   "who_can_claim": "anyone",
   "claim_stale_hours": 72,
-  "waiting_labels": {"styrelsen": "styrelsen"},
+  "waiting_labels": {},
+  "input_labels": ["input"],
   "trusted": ["jbmathisen"],
   "content_types": [".html", ".md", ".css"]
 }

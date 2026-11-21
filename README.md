@@ -31,7 +31,7 @@ Allt arbete finns som issues. Den fästa issuen **Sprint board** visar vem som h
 | `ready` | Ledig. Vem som helst får ta den. |
 | `granskning` | Läs och ge feedback. |
 | `text` | Skriv eller ändra text. |
-| `styrelsen` | Behöver ett svar eller ett beslut från styrelsen. Alla får tycka till i kommentarerna. |
+| `input` | Öppen fråga där alla är välkomna med sin syn. Skriv i en kommentar, du behöver inte ta den. |
 
 ### Med din AI (enklast)
 
@@ -40,10 +40,10 @@ Allt arbete finns som issues. Den fästa issuen **Sprint board** visar vem som h
 1. Gör en fork av repot (knappen *Fork* uppe till höger) och klona den.
 2. Öppna mappen i din AI-assistent (Claude Code, Codex, Cursor, Copilot …). Den läser `AGENTS.md` och sköter sprinten åt dig.
 3. Prata som vanligt:
-   - *"Vad finns att göra?"* eller *"Vad kan jag granska?"*
-   - *"Visa dashboarden."* Du får en webbsida med hela sprinten: vem som gör vad, öppna pull requests, lediga uppgifter och det som väntar på styrelsen.
+   - *"Vad finns att göra?"*, *"Vad kan jag granska?"* eller *"Var kan jag tycka till?"*
+   - *"Visa dashboarden."* Du får en webbsida med hela sprinten: vem som gör vad, öppna pull requests, lediga uppgifter och frågorna som är öppna för input.
    - *"Jag tar 15."*
-   - *"Jag kör fast, jag behöver styrelsens svar."*
+   - *"Jag kör fast, jag behöver Jonathans svar."*
    - *"Jag är klar."* Din AI visar texten eller ändringen och lämnar in den efter ditt ja: feedback som en kommentar i issuen, ändringar som en pull request.
 
 Du behöver inte kunna några kommandon. Sprintmastern (Jonathan) granskar och godkänner.
@@ -51,12 +51,13 @@ Du behöver inte kunna några kommandon. Sprintmastern (Jonathan) granskar och g
 ### Utan AI
 
 - **Ta en uppgift:** skriv `/claim` ensamt på en rad i issuen. Då blir den din och syns på tavlan. Vill du vara med på en som någon annan har: `/join`. Klar: `/done`.
+- **Tyck till** om en fråga med etiketten `input`: skriv i en kommentar.
 - **Ge feedback** i issuen. Hänvisa till numren i mockuperna (A1, B3 …), till exempel "A3: Utveckling känns för formellt".
 - **Ändra text** i en pull request från din fork. Skriv "Fixes #17" i beskrivningen, så kopplas den till issuen.
 
 Varje pull request får en automatisk kontroll som pekar ut dold text, skript och ändringar i filer utanför texterna. Läs mer om säkerheten i `AGENTS.md`.
 
-Där det står **TBC** saknas ett svar från styrelsen. Frågorna finns samlade sist i dokumentet och som issues med etiketten `styrelsen`.
+Där det står **TBC** saknas ett svar. Frågorna finns samlade sist i dokumentet och som issues med etiketten `input`: de är öppna för alla, inte bara styrelsen.
 
 ## Mappen `devsprinter/` och `.github/`
 

@@ -148,6 +148,7 @@ display:flex;align-items:center;gap:10px;flex-wrap:wrap;overflow-wrap:anywhere}
 font-size:13px;font-weight:700;color:#fff;flex:none}
 .ok .mark{background:var(--free)}.bad .mark{background:var(--stale)}.info .mark{background:var(--done)}
 .checks small,.panel small,.hint{color:var(--muted);font-size:13px}
+.rail .hint{margin:-2px 0 6px;font-size:12px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:8px 0;border-bottom:1px solid var(--line)}
 .row:last-of-type{border-bottom:0}.row>.k{width:220px;max-width:100%;font-weight:600}
@@ -379,7 +380,7 @@ def render(data: dict, app: dict | None = None, snapshot: bool = False) -> str:
     free = data.get("free") or []
     events = list(reversed(data.get("events") or []))[:40]
     prs = data.get("prs") or []
-    groups = {g: [f for f in free if group_of(f, ready_label) == g] for g in ("ready", "open", "waiting")}
+    groups = {g: [f for f in free if group_of(f, ready_label) == g] for g in ("ready", "input", "open", "waiting")}
 
     lanes = {k: [r for r in rows if LANE_OF.get(r["state"]) == k] for k, _ in LANES if k != "free"}
     counts = {"free": len(groups["ready"]), **{k: len(v) for k, v in lanes.items()}}
@@ -403,6 +404,13 @@ def render(data: dict, app: dict | None = None, snapshot: bool = False) -> str:
         board_html += lane_html(k, name, [item(r, repo) for r in lanes[k]])
 
     rail = ""
+    if groups["input"]:
+        rail += (f'<section><h2><span class="dot" style="--c:var(--progress)" aria-hidden="true"></span>'
+                 f'Open for input<span class="count">{len(groups["input"])}</span></h2>'
+                 f'<p class="hint">Anyone can give their view in a comment. Nobody needs to take these.</p><ul>'
+                 + "".join(f'<li><a class="num" href="{issue_link(repo, f["n"])}">#{int(f["n"])}</a><span class="t">'
+                           f'<a href="{issue_link(repo, f["n"])}" style="color:inherit;text-decoration:none">{esc(f["title"])}</a>'
+                           "</span></li>" for f in groups["input"]) + "</ul></section>")
     if groups["waiting"]:
         rail += (f'<section><h2><span class="dot" style="--c:var(--waiting)" aria-hidden="true"></span>'
                  f'Waiting on a decision<span class="count">{len(groups["waiting"])}</span></h2><ul>'

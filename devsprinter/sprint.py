@@ -163,14 +163,19 @@ def text_start(s: Sprint) -> str:
         waits += [r for r in review if r not in waits]
     if waits:
         out += ["", "Waiting on you:"] + [f"  {line(r)}" for r in waits]
-    ready, decisions = group(s, "ready"), group(s, "waiting")
+    ready, decisions, inputs = group(s, "ready"), group(s, "waiting"), group(s, "input")
     out += ["", f"Free to take ({len(ready)}):"] + [f"  {free_line(f)}" for f in ready[:6]]
     if len(ready) > 6:
         out.append(f"  … and {len(ready) - 6} more (`tasks`)")
+    if inputs:
+        out += ["", f"Open for input from everyone ({len(inputs)}): give your view in a comment, no need to take it"]
+        out += [f"  {free_line(f)}" for f in inputs[:4]]
+        if len(inputs) > 4:
+            out.append(f"  … and {len(inputs) - 4} more (`review`)")
     reviewable = [f for f in ready if REVIEW_LABELS & {lb.lower() for lb in f.get("labels") or []}]
     if reviewable or s.prs or decisions:
-        out += ["", f"To review or give input on: {len(reviewable)} review tasks, {len(s.prs)} open PRs, "
-                    f"{len(decisions)} decisions (`review`)"]
+        out += ["", f"To review: {len(reviewable)} review tasks, {len(s.prs)} open PRs"
+                    + (f", {len(decisions)} decisions" if decisions else "") + " (`review`)"]
     if s.board_issue:
         out += ["", f"Board: {s.url(s.board_issue['number'])}"]
     out += ["", DATA_NOTE]
@@ -179,7 +184,11 @@ def text_start(s: Sprint) -> str:
 
 def text_tasks(s: Sprint) -> str:
     ready, other, decisions = group(s, "ready"), group(s, "open"), group(s, "waiting")
+    inputs = group(s, "input")
     out = [f"Free to take ({len(ready)}):"] + ([f"  {free_line(f)}" for f in ready] or ["  none"])
+    if inputs:
+        out += ["", f"Open for input from everyone ({len(inputs)}): give your view in a comment, no need to take it"]
+        out += [f"  {free_line(f)}" for f in inputs]
     if other:
         out += ["", f"Not ready yet ({len(other)}): ask the sprintmaster before starting"]
         out += [f"  {free_line(f)}" for f in other]
@@ -215,6 +224,10 @@ def text_review(s: Sprint) -> str:
     if tasks or started:
         out += ["", "Review tasks:"] + [f"  {free_line(f)} (free)" for f in tasks] + \
             [f"  {line(r)} (join it)" for r in started if r["who"].lower() != s.me.lower()]
+    inputs = group(s, "input")
+    if inputs:
+        out += ["", "Open for input from everyone (comment with your view, no need to take it):"]
+        out += [f"  {free_line(f)}" for f in inputs]
     decisions = group(s, "waiting")
     if decisions:
         out += ["", "Decisions where input is welcome (comment, don't take):"]
@@ -313,6 +326,9 @@ def do_take(s: Sprint, n: int, join: bool = False, note: str = "") -> tuple[int,
         return TAKEN, (f"#{n} is taken, so it was not claimed: {who}\n"
                        f"Options: `join {n}` to work on it together, ask them first, or pick another task.")
     f = next((x for x in s.free if x["n"] == n), None)
+    if f and f.get("group") == "input" and not join:
+        return TAKEN, (f"#{n} is open for input from everyone, so nobody takes it. Give your view in a "
+                       f"comment instead: write it in a file and run `deliver {n} --comment-file F`.")
     hint = ""
     if f and f.get("group") == "waiting":
         hint = (f"\nNote: #{n} waits on a decision ({clean(f.get('waits'), 30)}). "

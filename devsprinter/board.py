@@ -213,10 +213,12 @@ def rows_for(issue: dict, team: dict | None = None, masters: list[str] | None = 
 def compute(issues: list[dict], team: dict | None = None,
             masters: list[str] | None = None) -> tuple[list[dict], list[dict]]:
     """(rows, free issues), without the board issue itself. A free issue has "group":
-    ready (anyone may take it), waiting (a waiting label, e.g. a decision) or open."""
+    ready (anyone may take it), input (open for everyone's input, nobody takes it), waiting
+    (a waiting label, e.g. a decision) or open (not ready yet)."""
     team = config.clean_team(team)
     open_numbers = {i["number"] for i in issues if not is_board(i)}
     waiting = {k.lower(): v for k, v in team["waiting_labels"].items()}
+    inputs = {lb.lower() for lb in team["input_labels"]}
     ready = team["ready_label"].lower()
     rows, free = [], []
     for i in issues:
@@ -227,8 +229,9 @@ def compute(issues: list[dict], team: dict | None = None,
         if not r:
             labels = labels_of(i)
             on = next((waiting[lb.lower()] for lb in labels if lb.lower() in waiting), None)
-            group = "waiting" if on else \
-                "ready" if ready and ready in (lb.lower() for lb in labels) else "open"
+            low = {lb.lower() for lb in labels}
+            group = "waiting" if on else "input" if inputs & low else \
+                "ready" if ready and ready in low else "open"
             free.append({"n": i["number"], "title": i["title"], "id": i.get("id"),
                          "labels": labels, "group": group, **({"waits": on} if on else {})})
     rows.sort(key=lambda r: (ORDER.index(r["state"]), r["secs"], r["n"]))
@@ -342,9 +345,9 @@ def render(issues: list[dict], now: datetime.datetime | None = None,
                          f"| {plan} | {cell(r['now'])} | {took} | {r['when']} |")
     else:
         lines.append("_Nobody is working on anything right now._")
-    groups = {g: [i for i in free if i.get("group", "open") == g] for g in ("ready", "open", "waiting")}
-    titles = {"ready": "Free to take", "open": "Not ready yet" if groups["ready"] else "Free",
-              "waiting": "Waiting on a decision"}
+    groups = {g: [i for i in free if i.get("group", "open") == g] for g in ("ready", "input", "open", "waiting")}
+    titles = {"ready": "Free to take", "input": "Open for input: comment, no need to take it",
+              "open": "Not ready yet" if groups["ready"] else "Free", "waiting": "Waiting on a decision"}
     if not free:
         lines += ["", "### Free (0)", "_Nothing._"]
     for g, items in groups.items():

@@ -12,7 +12,7 @@ the hooks and the dashboard use the same values:
 Open sprints (anyone may join with a comment, a fork PR or any LLM) add, all optional:
 
     {"sprintmasters": ["anna"], "who_can_claim": "anyone", "claim_stale_hours": 72,
-     "waiting_labels": {"board": "the board"}, "trusted": ["anna", "bo"],
+     "waiting_labels": {"board": "the board"}, "input_labels": ["input"], "trusted": ["anna", "bo"],
      "content_types": [".html", ".md", ".css"]}
 
 - sprintmasters: 1-2 accounts that approve work and may use /ready and /release @someone.
@@ -21,6 +21,8 @@ Open sprints (anyone may join with a comment, a fork PR or any LLM) add, all opt
 - claim_stale_hours: a claim made with a comment (people, not agents) turns stale after this
   long without a comment from that person.
 - waiting_labels: label -> who it waits on. The board lists those issues as waiting, not free.
+- input_labels: issues open for input from everyone (questions, proposals). Nobody takes them;
+  people give their view in a comment. Default: ["input"].
 - trusted: accounts whose PRs the PR check does not hold back.
 - content_types: file endings a PR may change without being flagged. Empty: any type.
 
@@ -42,7 +44,7 @@ from pathlib import Path
 TEAM_FILE = ".github/devsprinter.json"
 TEAM_DEFAULTS = {"quiet_minutes": 30, "stale_minutes": 240, "ready_label": "ready",
                  "sprintmasters": [], "who_can_claim": "anyone", "claim_stale_hours": 72,
-                 "waiting_labels": {}, "trusted": [], "content_types": []}
+                 "waiting_labels": {}, "input_labels": ["input"], "trusted": [], "content_types": []}
 LOGIN_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 # Ready-made choices for teams whose tasks are short, mixed or long: (quiet, stale) in minutes
 PRESETS = {"short": (10, 60), "mixed": (30, 240), "long": (60, 480)}
@@ -78,6 +80,7 @@ def clean_team(raw) -> dict:
             "who_can_claim": "collaborators" if raw.get("who_can_claim") == "collaborators" else "anyone",
             "claim_stale_hours": _int(raw.get("claim_stale_hours"), TEAM_DEFAULTS["claim_stale_hours"], 1, 24 * 60),
             "waiting_labels": _waiting(raw.get("waiting_labels")),
+            "input_labels": _labels(raw.get("input_labels"), TEAM_DEFAULTS["input_labels"]),
             "trusted": _logins(raw.get("trusted")),
             "content_types": _types(raw.get("content_types"))}
 
@@ -103,6 +106,17 @@ def _waiting(value) -> dict:
         v = " ".join(str(v).split())[:40] if isinstance(v, str) else ""
         if k:
             out[k] = v or k
+    return out
+
+
+def _labels(value, default: list[str]) -> list[str]:
+    if not isinstance(value, list):
+        return list(default)
+    out = []
+    for v in value[:20]:
+        v = " ".join(str(v).split())[:50] if isinstance(v, str) else ""
+        if v and v.lower() not in (o.lower() for o in out):
+            out.append(v)
     return out
 
 
