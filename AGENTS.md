@@ -4,7 +4,9 @@ This repo runs an open sprint with [Devsprinter](https://github.com/jbmathisen/d
 
 - **Project:** OpenSverige's draft of who we are, what we are and how we act: a document (`dokument.html`) and mockups for the website and social media. Mostly content work: reviews, input on decisions and text edits. Start with `README.md` and `index.html`.
 - **Sprintmaster(s):** @jbmathisen. Approves and merges every change.
-- **Language:** Swedish with people, in issues and in PRs. Follow the tone in `dokument.html` §6.
+- **Content language:** Swedish: the texts, and what you post in issues and PRs. Follow the tone in `dokument.html` §6.
+
+Always talk to your person in **their** language, whatever it is. Anyone may join, from anywhere.
 
 ## When a session starts
 Run `python devsprinter/sprint.py start` (or `python3`). Tell your person in a few lines where they stand: their tasks, anything waiting on them, and two or three free tasks that fit them. Then ask what they want to do. Start with what others are waiting on.
