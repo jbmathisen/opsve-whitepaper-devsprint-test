@@ -194,7 +194,7 @@ def rows_for(issue: dict, team: dict | None = None, masters: list[str] | None = 
         w = p.get("waiting")
         if w and "issue" in w and open_numbers is not None and w["issue"] not in open_numbers:
             w = None  # the issue it waited on is closed
-        joined = "joined" if p["role"] == "join" else "claimed"
+        joined = "joined someone" if p["role"] == "join" else "–"
         if p["done"]:
             rows.append(blank(base, "done", p["who"], now="done, waiting for approval", **seen, **took))
         elif w:
