@@ -34,6 +34,9 @@ Responses to S5–S7. These change what Devsprinter is: from "a Claude Code plug
 | R2 | **Roles: 1–2 sprintmasters and the workers.** Sprintmasters approve, set what is ready and answer "waiting on" items. | S6, S7 | export |
 | R3 | **First-time setup asks how the team wants to work** (who are the sprintmasters, who may take tasks, code or content, task length) and writes the setup, instead of the owner copying files and editing JSON. | S2, S3 | export |
 | R4 | Tasks can have several people (reviews need 2+), and the board shows *waiting on whom*. | S6, S7, S12 | export |
+| R5 | **The usual contribution is a PR from a fork**: the repo is shared openly in the Discord, contributors have no write access, and the sprintmaster approves PRs. The board must show linked PRs as *in review, waiting on the sprintmaster*. Today it ignores PRs completely. | S5 | export |
+
+Proposal for R1–R5: `docs/proposal-open-sprint.md` in the Devsprinter repo.
 
 ## Sprint
 

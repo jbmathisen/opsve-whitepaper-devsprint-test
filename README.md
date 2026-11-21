@@ -33,9 +33,9 @@ Allt arbete finns som issues. Den fästa issuen **Sprint board** visar vem som h
 | `text` | Skriv eller ändra text. |
 | `styrelsen` | Behöver ett svar eller ett beslut från styrelsen. Alla får tycka till i kommentarerna. |
 
-1. **Ta en uppgift.** Skriv "Jag tar den" i issuen, eller tilldela dig själv om du kan. Då syns den som din på tavlan.
+1. **Ta en uppgift.** Skriv "Jag tar den" i issuen. Sprintmastern ser till att den syns som din på tavlan.
 2. **Ge feedback** i issuen. Hänvisa till numren i mockuperna (A1, B3 …), till exempel "A3: Utveckling känns för formellt".
-3. **Ändra text** i en pull request. Länka issuen med "Fixes #12". Jonathan granskar och godkänner.
+3. **Ändra text** i en pull request: gör en fork av repot (knappen *Fork* uppe till höger), ändra i en egen gren och öppna en pull request hit. Skriv "Fixes #17" i beskrivningen, så kopplas den till issuen. Sprintmastern (Jonathan) granskar och godkänner.
 4. **Med Claude Code?** Installera Devsprinter-pluginet och skriv `/devsprinter:claim 12`. Då syns din agents framsteg på issuen av sig själv.
 
 Där det står **TBC** saknas ett svar från styrelsen. Frågorna finns samlade sist i dokumentet och som issues med etiketten `styrelsen`.
