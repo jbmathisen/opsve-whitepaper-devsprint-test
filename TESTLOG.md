@@ -24,6 +24,17 @@ Legend: ✅ works · ⚠️ works with friction · ❌ does not work / missing �
 | S12 | ❌ | **"Free (20)" lumps everything together.** The 11 board questions (`styrelsen`, no `ready`) sit next to the 7 open tasks. A content team needs the board grouped: *free to take* (ready), *waiting on a decision*, *blocked* (#21 waits on #1). The board knows `ready_label` but doesn't use it here. | export |
 | S13 | ⚠️ | The board footer only says "take a task with `/devsprinter:claim N`", so people without Claude Code get no instructions. Linked to S5. | export |
 
+## Requirements from the project lead (2026-11-21)
+
+Responses to S5–S7. These change what Devsprinter is: from "a Claude Code plugin" to "a sprint protocol on GitHub that any LLM or person can join".
+
+| # | Requirement | From | Export |
+|---|---|---|---|
+| R1 | **Anyone can connect the repo to their own LLM**, get the information they need and contribute. No Claude Code, no plugin, no collaborator access required. | S1, S5, S13 | export |
+| R2 | **Roles: 1–2 sprintmasters and the workers.** Sprintmasters approve, set what is ready and answer "waiting on" items. | S6, S7 | export |
+| R3 | **First-time setup asks how the team wants to work** (who are the sprintmasters, who may take tasks, code or content, task length) and writes the setup, instead of the owner copying files and editing JSON. | S2, S3 | export |
+| R4 | Tasks can have several people (reviews need 2+), and the board shows *waiting on whom*. | S6, S7, S12 | export |
+
 ## Sprint
 
 *(Filled in as the sprint runs: claims, collisions, board updates, what contributors said.)*
