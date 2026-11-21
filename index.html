@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vilka vi är: mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mockup.css">
+<style>
+  .opt { display: grid; grid-template-columns: 64px minmax(0,1fr) auto; gap: 20px; align-items: start; padding: 26px 0; border-top: 1px solid var(--hair); text-decoration: none; }
+  .opt:last-child { border-bottom: 1px solid var(--hair); }
+  .opt .l { font-family: var(--serif); font-style: italic; font-size: 54px; line-height: .9; color: var(--accent); }
+  .opt h3 { font-size: 24px; margin-bottom: 6px; }
+  .opt p { margin: 0; color: var(--muted); }
+  .opt .go { font: 500 13px var(--mono); color: var(--accent); padding-top: 8px; white-space: nowrap; }
+  .opt:hover h3 { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .how { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; margin-top: 20px; }
+  .how .card b { display: block; font-size: 17px; margin-bottom: 4px; }
+  .how .card p { margin: 0; }
+  @media (max-width: 700px) { .opt { grid-template-columns: 44px minmax(0,1fr); } .opt .l { font-size: 40px; } .opt .go { grid-column: 2; padding-top: 0; } .how { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="mock-bar"><strong>WORK IN PROGRESS</strong> Förslag på hur vi berättar vilka vi är · för feedback, inte publicerat</div>
+
+<main>
+  <section class="sec" style="border:0">
+    <div class="wrap" style="max-width:860px">
+      <p class="eyebrow">Utkast · november 2026</p>
+      <h1>Vilka vi är, <span class="ser">vad vi är och hur vi agerar.</span></h1>
+      <p class="lead">I dag säger sajten mycket om stämningen men lite om vad opensverige är. Här är ett förslag på hur det kan berättas: på en egen sida, på startsidan och i sociala medier. Allt bygger på samma text.</p>
+      <p class="note" style="margin-top:0"><b class="id">WIP</b>Det här är ett arbete som pågår. Inget är beslutat, och texterna ändras efter teamets feedback.</p>
+
+      <div style="margin-top:44px">
+        <a class="opt" href="a-om-sidan.html">
+          <span class="l">A</span>
+          <div><h3>En ny om-sida</h3><p>opensverige.se/om. Kärnan, community och förening, tre pelare, principer, var vi kommer ifrån och vart föreningen är på väg.</p></div>
+          <span class="go">Öppna →</span>
+        </a>
+        <a class="opt" href="b-startsidan.html">
+          <span class="l">B</span>
+          <div><h3>Startsidan och menyn</h3><p>En kort sektion under heron som säger vad opensverige är, "Om oss" i menyn och små ändringar i sidfoten. Resten av startsidan är oförändrad.</p></div>
+          <span class="go">Öppna →</span>
+        </a>
+        <a class="opt" href="c-sociala-medier.html">
+          <span class="l">C</span>
+          <div><h3>Sociala medier</h3><p>Fem kvadratiska kort med samma ord, för LinkedIn och Instagram.</p></div>
+          <span class="go">Öppna →</span>
+        </a>
+        <a class="opt" href="dokument.html">
+          <span class="l">≡</span>
+          <div><h3>Dokumentet</h3><p>Texten allt bygger på, med tonalitet, målgrupper och frågor till styrelsen.</p></div>
+          <span class="go">Läs →</span>
+        </a>
+      </div>
+
+      <h2 style="margin-top:64px; font-size:30px">Så ger du feedback</h2>
+      <div class="how">
+        <div class="card"><b>Läs kommentarerna</b><p>De streckade rutorna förklarar varje förslag. Stäng av dem uppe till höger för att se sidan som den skulle se ut.</p></div>
+        <div class="card"><b>Hänvisa till numret</b><p>Skriv till exempel "A3: Utveckling känns för formellt" eller "B3: bra, men kortare".</p></div>
+        <div class="card"><b>Svara på TBC</b><p>Där det står TBC saknas ett svar från styrelsen. Frågorna finns samlade sist i dokumentet.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

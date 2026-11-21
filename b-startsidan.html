@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Förslag B: Startsidan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mockup.css">
+<style>
+  .hero { display: grid; grid-template-columns: 1.1fr 1fr; gap: 32px; align-items: center; }
+  .hero .img { aspect-ratio: 4/5; }
+  .hero .img.stub { display: flex; align-items: center; justify-content: center; }
+  .band { background: var(--surface); }
+  .band .core { font-size: clamp(28px, 3.6vw, 44px); line-height: 1.08; letter-spacing: -.035em; font-weight: 700; max-width: 860px; margin: 0 0 32px; }
+  .mini { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); border-top: 1px solid var(--ink); }
+  .mini div { padding: 18px 18px 18px 0; }
+  .mini div + div { padding-left: 18px; border-left: 1px solid var(--hair); }
+  .mini .kw { font-family: var(--serif); font-style: italic; font-size: 34px; color: var(--accent); line-height: 1.05; }
+  .mini .verb { font: 700 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; margin: 4px 0 6px; }
+  .mini p { margin: 0; font-size: 14.5px; color: var(--muted); }
+  .stubs { display: grid; gap: 10px; }
+  .end h2 { margin-bottom: 12px; }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .hero .img { aspect-ratio: 16/9; } }
+  @media (max-width: 600px) { .mini { grid-template-columns: 1fr; } .mini div + div { padding-left: 0; border-left: 0; border-top: 1px solid var(--hair); } }
+</style>
+</head>
+<body>
+
+<div class="mock-bar">
+  <strong>MOCKUP</strong> Förslag B: placering på startsidan och i menyn · inte publicerat
+  <span class="sp"></span>
+  <a href="index.html">← Alla förslag</a>
+  <button id="toggle-notes" type="button" aria-pressed="true">Kommentarer: på</button>
+</div>
+
+<header class="top">
+  <a class="logo" href="#"><i></i>opensverige</a>
+  <span class="chip">Tech Embassy: hitta alla som bygger AI i Sverige</span>
+  <span class="sp"></span>
+  <nav>
+    <a href="a-om-sidan.html" class="is-new">Om oss</a>
+    <a href="#" class="hide-sm">Stadgar</a>
+    <a href="#" class="hide-sm">Regler</a>
+    <a href="#" class="pill">Bli medlem</a>
+    <a href="#" class="dbtn">Discord</a>
+  </nav>
+</header>
+
+<div class="shell">
+  <aside class="side">
+    <div class="lbl">Innehåll</div>
+    <a href="#hero" class="on"><span>01</span>Start</a>
+    <a href="#vad" class="is-new"><span>02</span>Vad vi är</a>
+    <a href="#rest"><span>03</span>Discord</a>
+    <a href="#rest"><span>04</span>Demo</a>
+    <a href="#rest"><span>05</span>Varför</a>
+    <a href="#rest"><span>06</span>IRL &amp; Labs</a>
+    <a href="#rest"><span>07</span>Bygget</a>
+    <a href="#rest"><span>08</span>Blogg</a>
+    <a href="#slut"><span>09</span>Kom förbi</a>
+  </aside>
+
+  <main>
+    <section class="sec" id="hero">
+      <div class="wrap">
+        <div class="note" style="margin-top:0"><b class="id">B1</b>"Om oss" läggs till i toppmenyn och leder till förslag A. Det är den enda ändringen i toppen.</div>
+        <div class="hero">
+          <div>
+            <h1>Här hänger de som bygger. <span class="ser">Ingen annanstans.</span></h1>
+            <div class="btns"><a class="btn dc" href="#">Gå med i Discord</a><a class="btn ghost" href="#">Bli medlem →</a></div>
+          </div>
+          <div class="img stub">Hero-bilden (oförändrad)</div>
+        </div>
+        <div class="note"><b class="id">B2</b>Heron rör vi inte. Den sätter känslan. Det som saknas är svaret på "vad är det här?", så det kommer direkt efter.</div>
+      </div>
+    </section>
+
+    <section class="sec band" id="vad">
+      <div class="wrap is-new">
+        <p class="eyebrow">opensverige är <span class="flag">NY SEKTION</span></p>
+        <p class="core">Ett öppet community och en ideell förening <span class="ser">för alla som bygger med AI.</span></p>
+        <div class="mini">
+          <div><div class="kw">Gemenskap</div><div class="verb">Bygg tillsammans</div><p>Ingen ska behöva bygga ensam.</p></div>
+          <div><div class="kw">Öppenhet</div><div class="verb">Dela</div><p>Kod, kunskap och misstag delas öppet.</p></div>
+          <div><div class="kw">Utveckling</div><div class="verb">Visa och lär</div><p>Vi visar saker innan de är klara.</p></div>
+        </div>
+        <p style="margin-top:24px"><a class="link" href="a-om-sidan.html">Läs mer om oss →</a></p>
+      </div>
+      <div class="wrap"><div class="note"><b class="id">B3</b>En kort sektion direkt under heron: kärnmeningen och de tre pelarna. Den förklarar vad opensverige är innan resten av sidan visar hur det ser ut. Kärnmeningen följer valet i A1.</div></div>
+    </section>
+
+    <section class="sec" id="rest">
+      <div class="wrap stubs">
+        <div class="stub">Discord · SuperGrok · #llm-news · Paragraf (oförändrat)</div>
+        <div class="note" style="margin:6px 0 14px"><b class="id">B4</b>Grok och SuperGrok tar stor plats här. TBC: hur används de i dag? Är det kvar räcker en rad som säger att det är bottarna i servern, så att det inte läses som en sponsor.</div>
+        <div class="stub">Demo: Inga slides. Bara din skärm. (oförändrat)</div>
+        <div class="stub">Varför: Sverige har konferenser. Vi har en verkstad. (oförändrat)</div>
+        <div class="note" style="margin:6px 0 14px"><b class="id">B5</b>Varför-sektionen och /varfor är grundarens röst och får vara kvar. Om-sidan är det gemensamma. Kanske en länk mellan dem: "Läs vilka vi är →".</div>
+        <div class="stub">IRL &amp; Labs · Bygget · Blogg (oförändrat)</div>
+      </div>
+    </section>
+
+    <section class="sec end" id="slut">
+      <div class="wrap">
+        <h2>Föreningen är öppen.</h2>
+        <p class="muted">En röst på årsmötet, rätt att lämna motioner och söka resurser ur labbet. Avgiften är frivillig.</p>
+        <p class="is-new" style="display:inline-block; padding:2px 0"><a class="link" href="a-om-sidan.html#framat">Vart föreningen är på väg →</a><span class="flag">NY</span></p>
+        <div class="btns" style="margin-top:20px"><a class="btn ghost" href="#">Läs stadgarna</a><a class="btn dc" href="#">Bli medlem</a></div>
+        <div class="note"><b class="id">B6</b>Avslutningen får en länk till vad föreningen vill bygga upp. Det är den som partners och bidragsgivare letar efter.</div>
+      </div>
+    </section>
+
+    <footer class="site">
+      <div><a class="logo" href="#"><i></i>opensverige</a><p class="muted" style="font-size:14px">Ett öppet community och en ideell förening för alla som bygger med AI.</p></div>
+      <div><div class="lbl">SAJTEN</div><a href="a-om-sidan.html" class="is-new">Om opensverige<span class="flag">NY</span></a><a href="#">Bli medlem</a><a href="#">Showcase</a><a href="#">Blogg</a><a href="#">Varför opensverige</a></div>
+      <div><div class="lbl">FÖRENINGEN</div><a href="#">Stadgar</a><a href="#">Regler</a><a href="#">Integritet</a><a href="#">Kontakt</a></div>
+      <div><div class="lbl">COMMUNITY</div><a href="#">Discord ↗</a><a href="#">GitHub ↗</a><a href="#">LinkedIn ↗</a></div>
+      <div class="legal">Ideell förening · Org.nr 802557-3422 · Bildad 23 april 2026</div>
+      <div class="note" style="grid-column:1/-1; margin:0"><b class="id">B7</b>I sidfoten: "Om opensverige" överst under Sajten, och beskrivningen byts från "builders som bygger AI-agenter, MCP-servrar och vibecoding-projekt" till kärnmeningen.</div>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/mockup.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Förslag A: Om-sidan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/mockup.css">
+</head>
+<body>
+
+<div class="mock-bar">
+  <strong>MOCKUP</strong> Förslag A: ny sida opensverige.se/om · inte publicerat
+  <span class="sp"></span>
+  <a href="index.html">← Alla förslag</a>
+  <button id="toggle-notes" type="button" aria-pressed="true">Kommentarer: på</button>
+</div>
+
+<header class="top">
+  <a class="logo" href="b-startsidan.html"><i></i>opensverige</a>
+  <span class="chip">Tech Embassy: hitta alla som bygger AI i Sverige</span>
+  <span class="sp"></span>
+  <nav>
+    <a href="#" class="is-new">Om oss</a>
+    <a href="#" class="hide-sm">Stadgar</a>
+    <a href="#" class="hide-sm">Regler</a>
+    <a href="#" class="pill">Bli medlem</a>
+    <a href="#" class="dbtn">Discord</a>
+  </nav>
+</header>
+
+<div class="shell">
+  <aside class="side">
+    <div class="lbl">Innehåll</div>
+    <a href="#om" class="on"><span>01</span>Om oss</a>
+    <a href="#vad"><span>02</span>Vad vi är</a>
+    <a href="#pelare"><span>03</span>Pelare</a>
+    <a href="#agerar"><span>04</span>Hur vi agerar</a>
+    <a href="#ifran"><span>05</span>Var vi kommer ifrån</a>
+    <a href="#framat"><span>06</span>Framåt</a>
+    <a href="#med"><span>07</span>Var med</a>
+  </aside>
+
+  <main>
+    <!-- 01 Kärnan -->
+    <section class="sec" id="om">
+      <div class="wrap">
+        <p class="eyebrow">Om opensverige</p>
+        <h1 id="core">Ett öppet community och en ideell förening <span class="ser">för alla som bygger med AI.</span></h1>
+        <p class="lead">Vi är mötesplatsen där folk som bygger med AI i Sverige hittar varandra, lär av varandra och visar vad de gör.</p>
+        <div class="btns">
+          <a class="btn dc" href="#">Gå med i Discord</a>
+          <a class="btn ghost" href="#">Bli medlem →</a>
+        </div>
+        <div class="note"><b class="id">A1</b>Kärnmeningen. Det finns tre förslag. Klicka för att se dem som rubrik. Vilken låter mest som er?
+          <div class="opts" data-swap="core">
+            <button type="button" aria-pressed="true" data-html='Ett öppet community och en ideell förening &lt;span class="ser"&gt;för alla som bygger med AI.&lt;/span&gt;'>1. Community och förening</button>
+            <button type="button" aria-pressed="false" data-html='Vi samlar människor som bygger med AI, &lt;span class="ser"&gt;för att lära, visa och utvecklas tillsammans.&lt;/span&gt;'>2. Vi samlar</button>
+            <button type="button" aria-pressed="false" data-html='Mötesplatsen där folk som bygger med AI &lt;span class="ser"&gt;hittar varandra.&lt;/span&gt;'>3. Mötesplatsen</button>
+          </div>
+        </div>
+        <div class="note"><b class="id">A0</b>Sidan samlar vilka vi är, vad vi är och hur vi agerar. Den ersätter inte /varfor: grundarens berättelse får ligga kvar som en personlig text och länkas längre ner. Tonalitet, målgrupper och frågor till styrelsen är interna och finns i dokumentet.</div>
+      </div>
+    </section>
+
+    <!-- 02 Vad vi är -->
+    <section class="sec" id="vad">
+      <div class="wrap">
+        <p class="eyebrow">02 · Vad vi är</p>
+        <h2>Två former <span class="ser">som hör ihop.</span></h2>
+        <div class="grid2" style="margin-top:28px">
+          <div class="card">
+            <span class="tag">Communityt</span>
+            <h3>Där det dagliga händer</h3>
+            <p>Discorden, IRL-träffar i flera städer, öppna demos och labbet där nya verktyg testas. Någon kör fast och någon annan svarar.</p>
+            <p>Alla får vara med, oavsett nivå, yrke eller arbetsgivare.</p>
+            <a class="link" href="#">Gå med i Discord →</a>
+          </div>
+          <div class="card">
+            <span class="tag">Föreningen</span>
+            <h3>Det communityt inte kan göra själv</h3>
+            <p>En ideell förening med stadgar, årsmöte och en röst per medlem. Föreningen ordnar events och workshops, söker stöd och bidrag, delar resurser till medlemmarnas projekt och håller ett öppet forum där folk kan utvecklas.</p>
+            <p>Medlemskapet är gratis och avgiften frivillig.</p>
+            <a class="link" href="#">Läs stadgarna →</a>
+          </div>
+        </div>
+        <div class="note"><b class="id">A2</b>Communityt och föreningen står sida vid sida, eftersom "Bli medlem" i dag kan betyda både Discord och föreningen.</div>
+
+        <h3 style="margin-top:44px">Vad vi inte är</h3>
+        <div class="not"><span>Ett bolag</span><span>En leverantör</span><span>Ett team som levererar projekt</span></div>
+        <p class="muted">Det som byggs i communityt tillhör dem som bygger det. Vi står inte mot någon. Många av våra medlemmar jobbar på företag, och alla är lika välkomna oavsett var de jobbar.</p>
+        <p class="muted">Ta gärna med ett problem från jobbet och få hjälp och tips. Dela bara det du får dela.</p>
+      </div>
+    </section>
+
+    <!-- 03 Pelare -->
+    <section class="sec" id="pelare">
+      <div class="wrap">
+        <p class="eyebrow">03 · Tre pelare</p>
+        <h2>Det allt vi gör <span class="ser">vilar på.</span></h2>
+        <div class="grid3" style="margin-top:28px">
+          <div class="card pillar">
+            <span class="num">01</span>
+            <div class="kw">Gemenskap</div>
+            <div class="verb">Bygg tillsammans</div>
+            <p>Ingen ska behöva bygga ensam.</p>
+            <ul><li>Discorden dygnet runt</li><li>IRL-träffar</li><li>Projekt som växer när andra hänger på</li></ul>
+          </div>
+          <div class="card pillar">
+            <span class="num">02</span>
+            <div class="kw">Öppenhet</div>
+            <div class="verb">Dela</div>
+            <p>Kod, kunskap och misstag delas öppet. Dörren står öppen för alla.</p>
+            <ul><li>Öppen källkod</li><li>Ingen ansökan</li><li>Frivillig avgift</li></ul>
+          </div>
+          <div class="card pillar">
+            <span class="num">03</span>
+            <div class="kw">Utveckling</div>
+            <div class="verb">Visa och lär</div>
+            <p>Vi visar saker innan de är klara, för det är då feedback gör mest nytta.</p>
+            <ul><li>Öppna och bokade demos</li><li>Workshops och labbet</li><li>Guider på bloggen</li></ul>
+          </div>
+        </div>
+        <div class="note"><b class="id">A3</b>Nyckelordet (Gemenskap, Öppenhet, Utveckling) är för dokument och partners. Verbet är för communityt. Samma innehåll i två register.</div>
+      </div>
+    </section>
+
+    <!-- 04 Hur vi agerar -->
+    <section class="sec dark" id="agerar">
+      <div class="wrap">
+        <p class="eyebrow">04 · Hur vi agerar</p>
+        <h2>Sju principer. <span class="ser">Samma överallt.</span></h2>
+        <div class="princ" style="margin-top:28px">
+          <div><h3>Rollen följer vad du gör</h3><p>Inte titel eller erfarenhet. Communityt är platt. Den som engagerar sig mer får ofta ett större ansvar och hjälper andra framåt.</p></div>
+          <div><h3>Vi lyfter varandra</h3><p>Vi delar andras idéer, visar upp andras projekt och firar när någon lyckas.</p></div>
+          <div><h3>Kritik riktas mot bygget, inte mot personen</h3><p>Feedbacken är rak och tonen schysst.</p></div>
+          <div><h3>Det du delar är ditt</h3><p>Ingen tar äganderätt i din kod eller dina idéer. Det som delas här är öppet, så behåll företagshemligheter, sekretessbelagt material och idéer du vill ha för dig själv utanför.</p></div>
+          <div><h3>Ingen säljer något här</h3><p>Inga investeringspitchar eller equity-erbjudanden riktas mot medlemmar.</p></div>
+          <div><h3>Oberoende</h3><p>Ingen leverantör betalar för plats eller omnämnande. Vi rekommenderar det som fungerar.</p></div>
+          <div><h3>Öppet för alla</h3><p>Medlemskapet kräver ingen ansökan och villkoras aldrig av betalning.</p></div>
+        </div>
+        <div class="note"><b class="id">A4</b>Principerna finns redan i stadgarna och reglerna, här samlade på ett ställe. TBC: gäller de fortfarande, eller behöver något uppdateras? Reglerna för Discorden kan länkas härifrån.</div>
+      </div>
+    </section>
+
+    <!-- 05 Var vi kommer ifrån -->
+    <section class="sec" id="ifran">
+      <div class="wrap">
+        <p class="eyebrow">05 · Var vi kommer ifrån</p>
+        <h2>Vi kommer från <span class="ser">alla möjliga håll.</span></h2>
+        <div class="chips">
+          <span class="k">Företagare</span><span class="k">Domänexperter</span><span class="k">Nyfikna</span>
+          <span>IT-system</span><span>Utveckling</span><span>Kod</span><span>Infrastruktur</span>
+          <span>Kommunikation</span><span>Marknadsföring</span><span>Design</span>
+        </div>
+        <p>Det som förenar oss är att vi bygger med AI, eller vill börja. OpenSverige är mötesplatsen. Här hittar folk varandra och bygger något ihop. Ibland blir det ett projekt, ibland ett gäng som åker på ett hackathon tillsammans.</p>
+        <p class="callout" style="margin-top:28px"><b>När vi är ute tillsammans</b>, på hackathons, events eller i andra sammanhang, gäller samma sak som i Discorden: var schysst, öppen och samarbetsvillig.</p>
+        <div class="note"><b class="id">A5</b>Bredden är poängen. Raden med chips kan växa med fler bakgrunder, eller bytas mot korta citat från medlemmar (TBC: vill några medverka?).</div>
+      </div>
+    </section>
+
+    <!-- 06 Framåt -->
+    <section class="sec" id="framat">
+      <div class="wrap">
+        <p class="eyebrow">06 · Under utveckling</p>
+        <h2>Vart föreningen <span class="ser">är på väg.</span></h2>
+        <p>Föreningen är ny och håller på att ta form. Riktningen är att bli en förening som företag, offentlig sektor och andra organisationer kan samarbeta med, i initiativ som passar communityts syfte och öppenhet.</p>
+        <div class="road">
+          <div><b>En röst</b>för communityt</div>
+          <div><b>Resurser</b>till medlemmarna, till exempel sponsrade tokens</div>
+          <div><b>Events</b>som gynnar medlemmarna</div>
+          <div><b>Öppna initiativ</b>som gynnar samhället</div>
+          <div><b>Öppna samarbeten</b>med företag, till exempel inom AI-infrastruktur</div>
+        </div>
+        <div class="pit"><b>Fallgropen vi undviker</b>Att det som skapas blir ett slutet sällskap eller möjligheter för ett fåtal. Det föreningen får in ska komma communityt till del på ett öppet sätt.</div>
+        <div class="note"><b class="id">A6</b>TBC: vad vill föreningen få stöd till först? Här kan en kontaktväg för partners och bidragsgivare ligga, till exempel "Vill din organisation samarbeta? Hör av dig till styrelsen."</div>
+      </div>
+    </section>
+
+    <!-- 07 CTA -->
+    <section class="sec" id="med">
+      <div class="wrap">
+        <h2>Vill du <span class="ser">vara med?</span></h2>
+        <p class="lead">Gå med i Discorden för att bygga med andra. Bli medlem i föreningen för att få en röst på årsmötet.</p>
+        <div class="btns">
+          <a class="btn dc" href="#">Gå med i Discord</a>
+          <a class="btn ghost" href="#">Bli medlem →</a>
+        </div>
+        <p style="margin-top:28px"><a class="link" href="#">Grundarens berättelse: varför opensverige finns →</a></p>
+      </div>
+    </section>
+
+    <footer class="site">
+      <div><a class="logo" href="#"><i></i>opensverige</a><p class="muted" style="font-size:14px">Ett öppet community och en ideell förening för alla som bygger med AI.</p></div>
+      <div><div class="lbl">SAJTEN</div><a href="#" class="is-new">Om opensverige<span class="flag">NY</span></a><a href="#">Bli medlem</a><a href="#">Showcase</a><a href="#">Blogg</a><a href="#">Varför opensverige</a></div>
+      <div><div class="lbl">FÖRENINGEN</div><a href="#">Stadgar</a><a href="#">Regler</a><a href="#">Integritet</a><a href="#">Kontakt</a></div>
+      <div><div class="lbl">COMMUNITY</div><a href="#">Discord ↗</a><a href="#">GitHub ↗</a><a href="#">LinkedIn ↗</a></div>
+      <div class="legal">Ideell förening · Org.nr 802557-3422 · Bildad 23 april 2026</div>
+    </footer>
+  </main>
+</div>
+
+<script src="assets/mockup.js"></script>
+</body>
+</html>

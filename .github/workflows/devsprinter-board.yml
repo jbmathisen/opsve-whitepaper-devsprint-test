@@ -1,0 +1,73 @@
+# Devsprinter board: keeps the pinned "Sprint board" issue current and, if they are turned on,
+# the views: feed to Discord/Slack, GitHub Projects and a static dashboard on Pages.
+# Event-driven (comments and assignees change), plus every hour to catch stale tasks.
+# Settings: see docs/views.md. Everything except the board is off until a secret/variable is set.
+name: Devsprinter board
+on:
+  issue_comment:
+    types: [created, edited, deleted]
+  issues:
+    types: [opened, closed, reopened, assigned, unassigned]
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+# Runs are queued rather than cancelled: a cancelled run could save the state before the feed
+# had sent its events. GitHub keeps only the latest one in the queue.
+concurrency:
+  group: devsprinter-board
+  cancel-in-progress: false
+jobs:
+  board:
+    # The board issue itself must not trigger a new run
+    if: github.event_name != 'issues' || !startsWith(github.event.issue.body, '<!-- devsprinter-board -->')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      pages: ${{ steps.pages.outputs.on }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Board (the Sprint board issue)
+        run: python devsprinter/board.py --repo "${{ github.repository }}" --state-out state.json --html site/index.html
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: View 1 – feed to Discord/Slack
+        run: python devsprinter/feed.py state.json
+        continue-on-error: true
+        env:
+          DEVSPRINTER_DISCORD_WEBHOOK: ${{ secrets.DEVSPRINTER_DISCORD_WEBHOOK }}
+          DEVSPRINTER_SLACK_WEBHOOK: ${{ secrets.DEVSPRINTER_SLACK_WEBHOOK }}
+          DEVSPRINTER_FEED_EVENTS: ${{ vars.DEVSPRINTER_FEED_EVENTS }}
+      - name: View 2 – GitHub Projects
+        if: vars.DEVSPRINTER_PROJECT != ''
+        run: python devsprinter/projects.py state.json --project "${{ vars.DEVSPRINTER_PROJECT }}"
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.DEVSPRINTER_PROJECT_TOKEN }}
+      - name: View 3 – dashboard (prepare Pages)
+        id: pages
+        if: vars.DEVSPRINTER_PAGES == 'true'
+        run: echo "on=true" >> "$GITHUB_OUTPUT"
+      - if: vars.DEVSPRINTER_PAGES == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  pages:
+    needs: board
+    if: needs.board.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

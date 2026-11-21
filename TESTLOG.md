@@ -1,0 +1,30 @@
+# Devsprinter field test: content sprint on the OpenSverige whitepaper
+
+**What:** Devsprinter v0.5.0 (`jbmathisen/devsprinter` at `13e49df`) used as the process manager for a *content* sprint (review, feedback, decisions, text edits), not a coding sprint. Several contributors from the OpenSverige community, one project lead who approves.
+**Where:** this repo (`jbmathisen/opsve-whitepaper-devsprint-test`), seeded from `jbmathisen/opensverige-whitepaper` at `dc0aed6` plus three uncommitted files (`infomote.html`, `infomote-punkter.md`, `PR-varfor.md`).
+**At the end:** the finished content goes back to `opensverige-whitepaper`. The findings marked **export** go to the Devsprinter repo as issues or notes.
+
+Legend: ✅ works · ⚠️ works with friction · ❌ does not work / missing · 💡 idea
+
+## Setup (2026-11-21)
+
+| # | | Finding | Export |
+|---|---|---|---|
+| S1 | ❌ | **The plugin repo is private**, so community contributors cannot run `claude plugin marketplace add jbmathisen/devsprinter`. For a multi-person test the repo must be public, or contributors skip the plugin. | export |
+| S2 | ⚠️ | **Turning on the board means copying `devsprinter/` (10 Python files) into the project.** In a content repo that is noise in the file list and needs a README note. The copy also drifts from the installed plugin version. A reusable action (`uses: jbmathisen/devsprinter/board@v0.5`) would need only the workflow file. | export |
+| S3 | ⚠️ | README step 2 doesn't mention `.github/devsprinter.json`. Content tasks run for days, so the default 30 min / 4 h makes everything stale. Picked *long tasks* (60 min / 8 h) by hand. Even 8 h is short for "wait for the board's answer". | export |
+| S4 | ✅ | The `ready` label is a good gate. Board questions (`styrelsen`) stay without `ready`, so nobody's agent gets Start on a question only people can answer. | |
+| S5 | ❌ | **No way to claim without Claude Code.** A contributor who comments "Jag tar den" isn't shown on the board. Self-assigning needs triage or write access, and a non-collaborator in a public repo can't be assigned at all. Today everyone who wants to show up on the board has to be a collaborator. | export |
+| S6 | ❌ | **One assignee per task doesn't fit review work.** "At least two people give feedback" is the normal shape of a review issue. The board can't show "2 of 2 reviews in" or who has commented. | export |
+| S7 | ❌ | **Progress comes only from an agent's plan steps.** Human content work has no plan, so these issues only ever show ⚪ assigned. Confirms LARDOMAR #1: the missing state is *waiting on whom* (board, reviewer, project lead). | export |
+
+## Sprint
+
+*(Filled in as the sprint runs: claims, collisions, board updates, what contributors said.)*
+
+| # | | Date | Finding | Export |
+|---|---|---|---|---|
+
+## Wrap-up
+
+*(What to export to Devsprinter, in priority order.)*
