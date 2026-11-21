@@ -35,6 +35,8 @@ Allt arbete finns som issues. Den fästa issuen **Sprint board** visar vem som h
 
 ### Med din AI (enklast)
 
+**Du behöver:** ett GitHub-konto, [GitHub CLI](https://cli.github.com/) inloggad (`gh auth login`), git och Python 3.10 eller nyare. Din AI kan hjälpa dig att installera det som saknas.
+
 1. Gör en fork av repot (knappen *Fork* uppe till höger) och klona den.
 2. Öppna mappen i din AI-assistent (Claude Code, Codex, Cursor, Copilot …). Den läser `AGENTS.md` och sköter sprinten åt dig.
 3. Prata som vanligt:
