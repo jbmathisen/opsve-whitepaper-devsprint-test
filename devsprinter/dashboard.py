@@ -69,6 +69,7 @@ padding:8px 12px;margin-bottom:6px;overflow-wrap:anywhere}
 .tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
 .events time{color:var(--muted);font-variant-numeric:tabular-nums;margin-right:8px;font-size:13px}
 .empty{color:var(--muted);font-style:italic}
+h2 .count{color:var(--muted);font-weight:400;font-size:.8em}
 button{font:inherit;font-size:13px;font-weight:600;border-radius:8px;padding:6px 14px;cursor:pointer;
 border:1px solid var(--btn);background:var(--btn);color:var(--btn-text)}
 button.ghost{background:transparent;color:var(--text);border-color:var(--line)}
@@ -175,6 +176,8 @@ def is_ready(f: dict, ready_label: str) -> bool:
 
 def free_item(f: dict, repo: str, app: dict | None) -> str:
     tags = "".join(f'<span class="tag">{esc(lb)}</span>' for lb in f.get("labels") or [])
+    if f.get("waits"):
+        tags = f'<span class="tag">waiting on {esc(f["waits"])}</span>' + tags
     link = f'<a href="https://github.com/{esc(repo)}/issues/{f["n"]}">#{f["n"]}</a>'
     action = ""
     if app is not None:
@@ -185,10 +188,12 @@ def free_item(f: dict, repo: str, app: dict | None) -> str:
     return f'<li><span class="t">{link} {esc(f["title"])}</span>{tags}{action}</li>'
 
 
-def page(title: str, body: str, app: dict | None, current: str, repo: str, meta: str) -> str:
+def page(title: str, body: str, app: dict | None, current: str, repo: str, meta: str,
+         snapshot: bool = False) -> str:
     """The shell around both pages: head, header with navigation (interactive only), script."""
     if app is None:
-        refresh, script, nav = '<meta http-equiv="refresh" content="60">', "", ""
+        refresh = "" if snapshot else '<meta http-equiv="refresh" content="60">'
+        script, nav = "", ""
     else:
         refresh = ""
         script = f'<script nonce="{esc(app.get("nonce", ""))}">{APP_JS}</script>'
@@ -207,8 +212,41 @@ def page(title: str, body: str, app: dict | None, current: str, repo: str, meta:
 """
 
 
-def render(data: dict, app: dict | None = None) -> str:
-    """The board page. `app` (interactive mode): {"me": login, "ready_label": str, "nonce": str}."""
+FREE_GROUPS = [("ready", "Free to take"), ("open", "Not ready yet"), ("waiting", "Waiting on a decision")]
+PR_STATE = {"review": "waiting for review", "changes": "changes asked", "approved": "approved", "draft": "draft"}
+
+
+def free_sections(free: list[dict], repo: str, app: dict | None) -> str:
+    """Free issues grouped: free to take, not ready yet, waiting on a decision."""
+    if not any(f.get("group") for f in free):  # older state files
+        items = "".join(free_item(f, repo, app) for f in free) or '<li class="empty">Nothing.</li>'
+        return f'<h2>Free</h2><ul class="free">{items}</ul>'
+    html = ""
+    for key, title in FREE_GROUPS:
+        items = [f for f in free if f.get("group", "open") == key]
+        if key == "open" and not any(f.get("group") == "ready" for f in free):
+            title = "Free"
+        if items:
+            html += (f'<h2>{title} <span class="count">{len(items)}</span></h2><ul class="free">'
+                     + "".join(free_item(f, repo, app) for f in items) + "</ul>")
+    return html or '<h2>Free</h2><ul class="free"><li class="empty">Nothing.</li></ul>'
+
+
+def pr_section(prs: list[dict], repo: str) -> str:
+    if not prs:
+        return ""
+    items = "".join(
+        f'<li><span class="t"><a href="https://github.com/{esc(repo)}/pull/{p["n"]}">PR #{p["n"]}</a> '
+        f'{esc(p["title"])}</span><span class="tag">@{esc(p["who"])}</span>'
+        f'<span class="tag">{esc(PR_STATE.get(p.get("state"), p.get("state")))}</span>'
+        + "".join(f'<span class="tag">fixes #{int(n)}</span>' for n in p.get("fixes") or [] if isinstance(n, int))
+        + "</li>" for p in prs)
+    return f'<h2>Open pull requests <span class="count">{len(prs)}</span></h2><ul class="free">{items}</ul>'
+
+
+def render(data: dict, app: dict | None = None, snapshot: bool = False) -> str:
+    """The board page. `app` (interactive mode): {"me": login, "ready_label": str, "nonce": str}.
+    `snapshot`: a file someone opened locally (no reload; the footer says how to refresh it)."""
     repo = data.get("repo") or ""
     rows = sorted(data.get("rows") or [], key=lambda r: (ORDER.index(r["state"]), r.get("secs") or 0))
     free = data.get("free") or []
@@ -224,15 +262,20 @@ def render(data: dict, app: dict | None = None) -> str:
     mine_html = "".join(card(r, repo, release.format(n=r["n"])) for r in mine) or \
         '<p class="empty">You have no task. Pick one under Free and press Start.</p>'
     cards = "".join(card(r, repo) for r in team) or '<p class="empty">Nobody is working on anything right now.</p>'
-    free_html = "".join(free_item(f, repo, app) for f in free) or '<li class="empty">Nothing.</li>'
+    free_html = free_sections(free, repo, app)
     ev_html = "".join(f'<li><time datetime="{esc(e["ts"])}">{esc(e["ts"][5:16].replace("T", " "))}</time>'
                       f'{esc(event_text(e))}</li>' for e in events if e.get("type") in EVENT_TEXT) \
         or '<li class="empty">No events yet. They appear after the next change.</li>'
     gen = esc((data.get("generated") or "").replace("T", " ").replace("Z", " UTC"))
-    if app is None:
+    if app is None and snapshot:
         sections = ""
-        team_title, foot = "In progress", ("the page reloads itself every minute · "
-                                           "take a task with <code>/devsprinter:claim N</code>")
+        team_title, foot = "In progress", ("a snapshot: ask your AI to show the dashboard again, or run "
+                                           "<code>python devsprinter/sprint.py dashboard</code>, for fresh data · "
+                                           "to join, ask your AI <i>what can I do?</i>")
+    elif app is None:
+        sections = ""
+        team_title, foot = "In progress", ("the page reloads itself every minute · to join, ask your AI "
+                                           "<i>what can I do?</i> or write <code>/claim</code> in an issue")
     else:
         sections = f'<div id="msg" role="status"></div><h2>My work (@{esc(app.get("me"))})</h2><div class="grid">{mine_html}</div>'
         team_title = "Team"
@@ -243,10 +286,11 @@ def render(data: dict, app: dict | None = None) -> str:
     body = f"""<div class="chips">{chips}</div>
 {sections}
 <h2>{team_title}</h2><div class="grid">{cards}</div>
-<h2>Free</h2><ul class="free">{free_html}</ul>
+{pr_section(data.get("prs") or [], repo)}
+{free_html}
 <h2>Recent events</h2><ul class="events">{ev_html}</ul>
 <footer>Devsprinter · {esc(thresholds(data.get("team")))} · progress is shown at 25/50/75/100 % · {foot}</footer>"""
-    return page(f"Devsprinter · {repo}", body, app, "board", repo, f"· updated {gen}")
+    return page(f"Devsprinter · {repo}", body, app, "board", repo, f"· updated {gen}", snapshot)
 
 
 # ---------- Setup page ----------

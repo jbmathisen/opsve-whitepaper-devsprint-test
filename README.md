@@ -39,6 +39,7 @@ Allt arbete finns som issues. Den fästa issuen **Sprint board** visar vem som h
 2. Öppna mappen i din AI-assistent (Claude Code, Codex, Cursor, Copilot …). Den läser `AGENTS.md` och sköter sprinten åt dig.
 3. Prata som vanligt:
    - *"Vad finns att göra?"* eller *"Vad kan jag granska?"*
+   - *"Visa dashboarden."* Du får en webbsida med hela sprinten: vem som gör vad, öppna pull requests, lediga uppgifter och det som väntar på styrelsen.
    - *"Jag tar 15."*
    - *"Jag kör fast, jag behöver styrelsens svar."*
    - *"Jag är klar."* Din AI visar texten eller ändringen och lämnar in den efter ditt ja: feedback som en kommentar i issuen, ändringar som en pull request.

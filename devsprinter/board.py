@@ -449,15 +449,28 @@ def publish(repo: str, issues: list[dict], body: str) -> str:
     return f"Created and pinned {url}."
 
 
+def pr_summary(prs: list[dict] | None) -> list[dict]:
+    """Open PRs for the views: number, title, author, review state and the issues they fix."""
+    out = []
+    for p in prs or []:
+        decision = p.get("reviewDecision")
+        state = "draft" if p.get("isDraft") else "changes" if decision == "CHANGES_REQUESTED" else \
+            "approved" if decision == "APPROVED" else "review"
+        out.append({"n": p.get("number"), "title": p.get("title") or "", "who": (p.get("author") or {}).get("login") or "?",
+                    "state": state, "fixes": [r.get("number") for r in
+                                              (p.get("closingIssuesReferences") or {}).get("nodes") or []]})
+    return out
+
+
 def export(repo: str, issues: list[dict], state: dict, new: list[dict],
            now: datetime.datetime | None = None, team: dict | None = None,
-           masters: list[str] | None = None) -> dict:
+           masters: list[str] | None = None, prs: list[dict] | None = None) -> dict:
     """The state that feed.py, projects.py, dashboard.py and serve.py read."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
     rows, free = compute(issues, team, masters)
     return {"v": 1, "repo": repo, "generated": now.isoformat(timespec="seconds").replace("+00:00", "Z"),
-            "rows": rows, "free": free, "events": state["events"], "new_events": new,
-            "team": config.clean_team(team)}
+            "rows": rows, "free": free, "prs": pr_summary(prs), "events": state["events"], "new_events": new,
+            "team": config.clean_team(team), "masters": masters or []}
 
 
 def main() -> None:

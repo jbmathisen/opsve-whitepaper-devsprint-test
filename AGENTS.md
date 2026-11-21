@@ -16,7 +16,8 @@ Run `python devsprinter/sprint.py start` (or `python3`). Tell your person in a f
 |---|---|---|
 | "What can I do?" · "What's free?" | `tasks` | Suggest a few that fit them, and ask which one. |
 | "What can I review?" · "Where can I give input?" | `review` | Offer the review tasks, open PRs and decisions. |
-| "What's going on?" · "Show me the board" | `status` | Summarise it in a few lines and give the board link. |
+| "What's going on?" | `status` | Summarise it in a few lines and give the board link. |
+| "Show me the dashboard" · "Give me an overview" | `dashboard` | Opens a web page with everything: who is on what, PRs, free tasks, decisions, latest events. It is a snapshot built with their own GitHub login; run it again for fresh data. |
 | "Tell me about 17" | `show 17` | Explain the task and what "done" means. |
 | "I'll take 17" · "Let's do 17" | `take 17` | Only after they have said yes to that number. Then start the work. |
 | "I want to help with 14" (someone has it) | `join 14` | Say who else is on it. |
@@ -24,7 +25,7 @@ Run `python devsprinter/sprint.py start` (or `python3`). Tell your person in a f
 | "I'm done" | `deliver` (see below) | Tell them it now waits on the sprintmaster. |
 | "Give it back" · "I'll stop" | `release 17` | |
 
-`take`, `join`, `wait`, `deliver` and `release` write in the issue under your person's name. Say what you are about to do and wait for their yes. `start`, `tasks`, `review`, `status` and `show` only read, so just run them.
+`take`, `join`, `wait`, `deliver` and `release` write in the issue under your person's name. Say what you are about to do and wait for their yes. `start`, `tasks`, `review`, `status`, `dashboard` and `show` only read, so just run them.
 
 ## Delivering
 - **Feedback, a review or an answer:** write it in a file, show your person the text, and after their yes run `deliver 17 --comment-file that-file.md`. It is posted in the issue and the task is marked done.

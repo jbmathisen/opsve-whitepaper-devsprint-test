@@ -9,6 +9,9 @@ runs one of these and tells them the answer in their own language:
     python devsprinter/sprint.py tasks            what is free to take, and what is not ready yet
     python devsprinter/sprint.py review           what you can review or give input on
     python devsprinter/sprint.py status           the whole board, and the latest events
+    python devsprinter/sprint.py dashboard        the same as a web page, opened in the browser
+                                                  (built with your own gh login, so it works for
+                                                  private repos too; nothing is published)
     python devsprinter/sprint.py show 17          one task: description, who is on it, linked PRs
     python devsprinter/sprint.py take 17          take it (refused if someone else has it)
     python devsprinter/sprint.py join 17          work on it together with whoever has it
@@ -34,6 +37,7 @@ import os
 import re
 import subprocess
 import sys
+import webbrowser
 from pathlib import Path
 
 import board
@@ -262,6 +266,18 @@ def text_show(s: Sprint, n: int) -> str:
     return "\n".join(out)
 
 
+def write_dashboard(s: Sprint, issues: list[dict], out: Path | None = None) -> Path:
+    """A snapshot of the board as one HTML file, in ~/.devsprinter/dashboards/ by default."""
+    import dashboard
+    _, state, new = board.build(issues, team=s.team, masters=s.masters)
+    data = board.export(s.repo, issues, state, new, team=s.team, masters=s.masters, prs=s.prs)
+    home = Path(os.environ.get("DEVSPRINTER_HOME", Path.home() / ".devsprinter"))
+    out = out or home / "dashboards" / (s.repo.replace("/", "--") + ".html")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(dashboard.render(data, snapshot=True), encoding="utf-8")
+    return out
+
+
 # ---------- acting ----------
 
 def post(repo: str, n: int, text: str) -> bool:
@@ -384,8 +400,8 @@ def main() -> int:
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("what", choices=["start", "tasks", "review", "status", "show", "take", "join",
-                                     "wait", "back", "release", "done", "deliver"])
+    ap.add_argument("what", choices=["start", "tasks", "review", "status", "dashboard", "show", "take",
+                                     "join", "wait", "back", "release", "done", "deliver"])
     ap.add_argument("issue", nargs="?", help="issue number, e.g. 17")
     ap.add_argument("--repo", help="owner/repo (default: origin, or its parent if origin is your fork)")
     ap.add_argument("--on", default="", help="wait: whom you wait on (@login, #12, or a few words)")
@@ -395,6 +411,8 @@ def main() -> int:
     ap.add_argument("--title", help="deliver --pr: PR title")
     ap.add_argument("--body-file", help="deliver --pr: what the PR changes and why")
     ap.add_argument("--base", default="main")
+    ap.add_argument("--out", help="dashboard: write the page here instead of ~/.devsprinter/dashboards/")
+    ap.add_argument("--no-open", action="store_true", help="dashboard: don't open the browser")
     args = ap.parse_args()
 
     repo, fork = (args.repo, None) if args.repo else find_repo()
@@ -425,6 +443,11 @@ def main() -> int:
         text = text_review(s)
     elif args.what == "status":
         text = text_status(s)
+    elif args.what == "dashboard":
+        path = write_dashboard(s, issues, Path(args.out) if args.out else None)
+        if not args.no_open:
+            webbrowser.open(path.resolve().as_uri())
+        text = f"Dashboard: {path.resolve()}\nA snapshot from now. Run it again for fresh data."
     elif args.what == "show":
         text = text_show(s, n)
     elif args.what in ("take", "join"):
