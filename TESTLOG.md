@@ -17,6 +17,12 @@ Legend: ✅ works · ⚠️ works with friction · ❌ does not work / missing �
 | S5 | ❌ | **No way to claim without Claude Code.** A contributor who comments "Jag tar den" isn't shown on the board. Self-assigning needs triage or write access, and a non-collaborator in a public repo can't be assigned at all. Today everyone who wants to show up on the board has to be a collaborator. | export |
 | S6 | ❌ | **One assignee per task doesn't fit review work.** "At least two people give feedback" is the normal shape of a review issue. The board can't show "2 of 2 reviews in" or who has commented. | export |
 | S7 | ❌ | **Progress comes only from an agent's plan steps.** Human content work has no plan, so these issues only ever show ⚪ assigned. Confirms LARDOMAR #1: the missing state is *waiting on whom* (board, reviewer, project lead). | export |
+| S8 | ⚠️ | First push was refused: "push declined due to email privacy restrictions" (commit had the private email). Fixed with the noreply address in the repo's git config. Not a Devsprinter bug, but worth a line in a "new repo" checklist. | |
+| S9 | ✅ | **The board created and pinned itself** while the issues were being created, with no manual step. The first run after the push found the right settings (footer: quiet 1 h, stale 8 h). | |
+| S10 | ⚠️ | The board issue took number **#12** in the middle of the sprint issues. Tip for the README: run the workflow once (`workflow_dispatch`) *before* creating issues, so the board is #1. | export |
+| S11 | ⚠️ | Creating 20 issues started 20 board runs. 17 were cancelled by the concurrency queue, as designed, but the Actions tab looks alarming to a non-developer. | export |
+| S12 | ❌ | **"Free (20)" lumps everything together.** The 11 board questions (`styrelsen`, no `ready`) sit next to the 7 open tasks. A content team needs the board grouped: *free to take* (ready), *waiting on a decision*, *blocked* (#21 waits on #1). The board knows `ready_label` but doesn't use it here. | export |
+| S13 | ⚠️ | The board footer only says "take a task with `/devsprinter:claim N`", so people without Claude Code get no instructions. Linked to S5. | export |
 
 ## Sprint
 
