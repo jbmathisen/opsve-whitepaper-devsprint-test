@@ -22,16 +22,20 @@ import config
 from board import EVENT_TEXT, event_text, thresholds
 from context import span
 
-LABEL = {"active": "Active", "quiet": "Quiet", "assigned": "Assigned", "stale": "Stale", "done": "Done"}
-ORDER = ["active", "quiet", "assigned", "stale", "done"]
+LABEL = {"active": "Active", "claimed": "Claimed", "quiet": "Quiet", "assigned": "Assigned",
+         "waiting": "Waiting", "review": "In review", "changes": "Changes asked", "stale": "Stale",
+         "done": "Done"}
+ORDER = ["active", "claimed", "quiet", "assigned", "waiting", "review", "changes", "stale", "done"]
 PRESET_TEXT = {"short": "Short tasks", "mixed": "Mixed", "long": "Long tasks"}
 VIEWS_DOC = "https://github.com/jbmathisen/devsprinter/blob/main/docs/views.md"
 CSS = """
 :root{--bg:#f7f7f5;--card:#fff;--text:#1d1d1b;--muted:#6b6b66;--line:#e4e3de;
---active:#1f8a4c;--quiet:#b7791f;--assigned:#7a7a74;--stale:#c0392b;--done:#6b4fbb;--accent:#2563eb;
+--active:#1f8a4c;--claimed:#1f8a4c;--quiet:#b7791f;--assigned:#7a7a74;--waiting:#b7791f;
+--review:#2563eb;--changes:#b7791f;--stale:#c0392b;--done:#6b4fbb;--accent:#2563eb;
 --btn:#1d1d1b;--btn-text:#fff}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#151514;--card:#1f1f1d;
---text:#ecebe6;--muted:#a3a29b;--line:#33332f;--active:#4cc27f;--quiet:#e0a43a;--assigned:#a3a29b;
+--text:#ecebe6;--muted:#a3a29b;--line:#33332f;--active:#4cc27f;--claimed:#4cc27f;--quiet:#e0a43a;
+--assigned:#a3a29b;--waiting:#e0a43a;--review:#6ea0ff;--changes:#e0a43a;
 --stale:#ef6b5b;--done:#a58cf0;--accent:#6ea0ff;--btn:#ecebe6;--btn-text:#151514}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);
 font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}

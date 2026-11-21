@@ -1,0 +1,34 @@
+# Devsprinter PR check: flags hidden text, active content, text aimed at an AI, protected files
+# (CI, agent instructions, hooks) and file types outside the team's content types, in one
+# comment on the PR that starts with a notice to AI reviewers. See devsprinter/prcheck.py.
+#
+# Safe on PRs from strangers: pull_request_target runs this file and prcheck.py from the BASE
+# branch, and the PR is only read as data through the API. Never add a checkout of the PR's
+# head here, and never run anything from the PR.
+name: Devsprinter PR check
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited]
+permissions:
+  contents: read
+  pull-requests: write
+concurrency:
+  group: devsprinter-prcheck-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check the PR (read through the API, never checked out)
+        run: python devsprinter/prcheck.py --repo "$REPO" --pr "$PR" --comment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}

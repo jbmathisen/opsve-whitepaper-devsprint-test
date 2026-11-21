@@ -26,7 +26,8 @@ import sys
 
 FIELD_STATE = "Devsprinter"
 TEXT_FIELDS = ["Who", "Plan", "Now", "Last active"]
-OPTIONS = [("active", "GREEN"), ("quiet", "YELLOW"), ("assigned", "GRAY"), ("stale", "RED"),
+OPTIONS = [("active", "GREEN"), ("claimed", "GREEN"), ("quiet", "YELLOW"), ("assigned", "GRAY"),
+           ("waiting", "ORANGE"), ("review", "BLUE"), ("changes", "ORANGE"), ("stale", "RED"),
            ("done", "PURPLE"), ("free", "BLUE")]
 ORDER = [o for o, _ in OPTIONS]
 PROJECT_FIELDS = """id title url

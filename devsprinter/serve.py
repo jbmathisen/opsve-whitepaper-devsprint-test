@@ -257,9 +257,10 @@ class App:
                                        f"warnings: {'on' if saved['context'] else 'off'}."}
 
     def save_team(self, body: dict) -> dict:
-        team = config.clean_team(body)
         with self.lock:
-            _, sha = self.team(fresh=True)
+            current, sha = self.team(fresh=True)
+            # The Setup page only sends the times and the label: keep roles and the rest
+            team = config.clean_team({**config.clean_team(current), **(body if isinstance(body, dict) else {})})
             ok, msg = config.save_team_remote(self.repo, team, sha)
             self._team, self._cache = None, None
         if ok:

@@ -17,6 +17,12 @@ The board also keeps the previous snapshot and the latest events in a hidden lin
 feed.py (Discord/Slack), projects.py (GitHub Projects), dashboard.py (web page) and serve.py
 (the interactive local dashboard). `--state-out file.json` writes the state and new events.
 
+Open sprints: people and any LLM also join with comment commands (/claim, /join, /done,
+/waiting ..., see commands.py), and an open PR that says "Fixes #N" puts #N in review, waiting
+on the sprintmaster. With `--act` (the Action) the board also carries out the commands once:
+assigns or unassigns the commenter, adds the ready label, or answers a refused command. The
+comment ids it has handled are kept in the saved state.
+
 Run by a GitHub Action (.github/workflows/devsprinter-board.yml) or locally with `gh`.
 """
 import argparse
@@ -27,6 +33,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+import commands
 import config
 from context import ago, elapsed, pulses, span
 from emit import milestone, short
@@ -35,13 +42,18 @@ BOARD_MARKER = "<!-- devsprinter-board -->"
 BOARD_TITLE = "Sprint board"
 STATE_RE = re.compile(r"<!-- devsprinter-state (\{.*?\}) -->", re.S)
 MAX_EVENTS = 100
+MAX_SEEN = 300
+REPLY_MARKER = "<!-- devsprinter-reply -->"
 QUERY = """query($owner:String!,$name:String!){repository(owner:$owner,name:$name){
 issues(states:OPEN,first:100,orderBy:{field:UPDATED_AT,direction:DESC}){nodes{
 id number title body isPinned assignees(first:10){nodes{login}} labels(first:20){nodes{name}}
-comments(last:50){nodes{author{login} body}}}}}}"""
-STATE_LABEL = {"active": "🟢 active", "quiet": "🟡 quiet", "stale": "🔴 stale", "done": "✅ done",
-               "assigned": "⚪ assigned"}
-ORDER = ["active", "quiet", "assigned", "stale", "done"]
+comments(last:50){nodes{id createdAt authorAssociation author{__typename login} body}}}}
+pullRequests(states:OPEN,first:50,orderBy:{field:UPDATED_AT,direction:DESC}){nodes{
+number isDraft reviewDecision author{login} closingIssuesReferences(first:10){nodes{number}}}}}}"""
+STATE_LABEL = {"active": "🟢 active", "claimed": "🙋 claimed", "quiet": "🟡 quiet",
+               "assigned": "⚪ assigned", "waiting": "⏳ waiting", "review": "👀 in review",
+               "changes": "✏️ changes asked", "stale": "🔴 stale", "done": "✅ done"}
+ORDER = ["active", "claimed", "quiet", "assigned", "waiting", "review", "changes", "stale", "done"]
 # Event types and how they read. `started` and `replanned` are shown on the board and the
 # dashboard but are not sent to the feed by default (feed.py).
 EVENT_TEXT = {
@@ -72,7 +84,20 @@ def fetch(repo: str) -> list[dict]:
     out = gh("api", "graphql", "-f", f"query={QUERY}", "-F", f"owner={owner}", "-F", f"name={name}")
     if out is None:
         raise SystemExit(f"Could not read the issues of {repo} (is gh logged in?).")
-    return json.loads(out)["data"]["repository"]["issues"]["nodes"]
+    data = json.loads(out)["data"]["repository"]
+    issues = data["issues"]["nodes"]
+    link_prs(issues, (data.get("pullRequests") or {}).get("nodes") or [])
+    return issues
+
+
+def link_prs(issues: list[dict], prs: list[dict]) -> None:
+    """Attach each open PR to the issues it closes ("Fixes #N"), as issue["prs"]."""
+    by_n = {i["number"]: i for i in issues}
+    for pr in prs:
+        for ref in (pr.get("closingIssuesReferences") or {}).get("nodes") or []:
+            i = by_n.get(ref.get("number"))
+            if i is not None:
+                i.setdefault("prs", []).append(pr)
 
 
 def cell(text) -> str:
@@ -87,8 +112,27 @@ def labels_of(issue: dict) -> list[str]:
     return [lb["name"] for lb in (issue.get("labels") or {}).get("nodes") or [] if lb.get("name")]
 
 
-def rows_for(issue: dict, team: dict | None = None) -> list[dict]:
+def blank(base: dict, state: str, who: str, **extra) -> dict:
+    row = {**base, "state": state, "who": who, "plan": "–", "rev": 0, "done": 0, "total": 0,
+           "pct": 0, "now": "–", "when": "–", "secs": 0, "ts": None, "took_s": None, "took": "–"}
+    row.update(extra)
+    return row
+
+
+def waits_text(w: dict | None) -> str:
+    if not w:
+        return ""
+    if "user" in w:
+        return "@" + w["user"]
+    if "issue" in w:
+        return f"#{w['issue']}"
+    return w.get("text") or "someone"
+
+
+def rows_for(issue: dict, team: dict | None = None, masters: list[str] | None = None,
+             open_numbers: set[int] | None = None) -> list[dict]:
     team = config.clean_team(team)
+    masters = masters if masters is not None else team["sprintmasters"]
     base = {"n": issue["number"], "title": issue["title"], "id": issue.get("id")}
     rows = []
     for p in pulses(issue):
@@ -114,26 +158,73 @@ def rows_for(issue: dict, team: dict | None = None) -> list[dict]:
                      "ts": p["ts"] if secs is not None else None,
                      "took_s": round(took_s) if took_s is not None else None,
                      "took": span(took_s) if took_s is not None else "–"})
-    with_pulse = {r["who"].lower() for r in rows}
+    covered = {r["who"].lower() for r in rows}
+    # Open PRs that close this issue: the author's work is in review (or needs changes)
+    for pr in issue.get("prs") or []:
+        author = (pr.get("author") or {}).get("login") or ""
+        if not author or author.lower() in covered:
+            continue
+        covered.add(author.lower())
+        now = f"PR #{pr['number']}"
+        if pr.get("isDraft"):
+            rows.append(blank(base, "claimed", author, now=f"draft {now}"))
+        elif pr.get("reviewDecision") == "CHANGES_REQUESTED":
+            rows.append(blank(base, "changes", author, now=f"{now} · waiting on @{author}",
+                              waits="@" + author))
+        else:
+            sm = " ".join("@" + m for m in masters) or "the sprintmaster"
+            rows.append(blank(base, "review", author, now=f"{now} · waiting on {sm}", waits=sm))
+    # People who joined with a comment command (no plugin, no PR yet)
+    folded = commands.fold(issue, masters, team["who_can_claim"], team["ready_label"])
+    for low, p in folded["people"].items():
+        if low in covered:
+            continue
+        covered.add(low)
+        when, secs = ago(p["last"])
+        took_s = elapsed(p["since"], p["last"] if p["done"] else None)
+        took = {"took_s": round(took_s) if took_s is not None else None,
+                "took": span(took_s) if took_s is not None else "–"}
+        seen = {"when": when if secs is not None else "–", "secs": secs or 0, "ts": p["last"]}
+        w = p.get("waiting")
+        if w and "issue" in w and open_numbers is not None and w["issue"] not in open_numbers:
+            w = None  # the issue it waited on is closed
+        joined = "joined" if p["role"] == "join" else "claimed"
+        if p["done"]:
+            rows.append(blank(base, "done", p["who"], now="done, waiting for approval", **seen, **took))
+        elif w:
+            rows.append(blank(base, "waiting", p["who"], now=f"waiting on {waits_text(w)}",
+                              waits=waits_text(w), **seen, **took))
+        elif secs is None or secs > team["claim_stale_hours"] * 3600:
+            rows.append(blank(base, "stale", p["who"], now=joined, **seen, **took))
+        else:
+            rows.append(blank(base, "claimed", p["who"], now=joined, **seen, **took))
     for a in (issue.get("assignees") or {}).get("nodes") or []:
-        if a["login"].lower() not in with_pulse:
-            rows.append({**base, "state": "assigned", "who": a["login"], "plan": "–", "rev": 0,
-                         "done": 0, "total": 0, "pct": 0, "now": "–", "when": "–", "secs": 0,
-                         "ts": None, "took_s": None, "took": "–"})
+        if a["login"].lower() not in covered:
+            rows.append(blank(base, "assigned", a["login"]))
     return rows
 
 
-def compute(issues: list[dict], team: dict | None = None) -> tuple[list[dict], list[dict]]:
-    """(rows, free issues), without the board issue itself."""
+def compute(issues: list[dict], team: dict | None = None,
+            masters: list[str] | None = None) -> tuple[list[dict], list[dict]]:
+    """(rows, free issues), without the board issue itself. A free issue has "group":
+    ready (anyone may take it), waiting (a waiting label, e.g. a decision) or open."""
+    team = config.clean_team(team)
+    open_numbers = {i["number"] for i in issues if not is_board(i)}
+    waiting = {k.lower(): v for k, v in team["waiting_labels"].items()}
+    ready = team["ready_label"].lower()
     rows, free = [], []
     for i in issues:
         if is_board(i):
             continue
-        r = rows_for(i, team)
+        r = rows_for(i, team, masters, open_numbers)
         rows += r
         if not r:
+            labels = labels_of(i)
+            on = next((waiting[lb.lower()] for lb in labels if lb.lower() in waiting), None)
+            group = "waiting" if on else \
+                "ready" if ready and ready in (lb.lower() for lb in labels) else "open"
             free.append({"n": i["number"], "title": i["title"], "id": i.get("id"),
-                         "labels": labels_of(i)})
+                         "labels": labels, "group": group, **({"waits": on} if on else {})})
     rows.sort(key=lambda r: (ORDER.index(r["state"]), r["secs"], r["n"]))
     return rows, free
 
@@ -227,9 +318,10 @@ def thresholds(team: dict | None) -> str:
 
 
 def render(issues: list[dict], now: datetime.datetime | None = None,
-           state: dict | None = None, team: dict | None = None) -> str:
+           state: dict | None = None, team: dict | None = None,
+           masters: list[str] | None = None) -> str:
     now = now or datetime.datetime.now(datetime.timezone.utc)
-    rows, free = compute(issues, team)
+    rows, free = compute(issues, team, masters)
     counts = {k: sum(r["state"] == k for r in rows) for k in ORDER}
     lines = [BOARD_MARKER, f"## {BOARD_TITLE}",
              " · ".join([f"{STATE_LABEL[k]} {counts[k]}" for k in ORDER if counts[k]] + [f"free {len(free)}"]),
@@ -244,14 +336,23 @@ def render(issues: list[dict], now: datetime.datetime | None = None,
                          f"| {plan} | {cell(r['now'])} | {took} | {r['when']} |")
     else:
         lines.append("_Nobody is working on anything right now._")
-    lines += ["", f"### Free ({len(free)})"]
-    lines += [f"- #{i['n']} {cell(i['title'])}" for i in free] or ["_Nothing._"]
+    groups = {g: [i for i in free if i.get("group", "open") == g] for g in ("ready", "open", "waiting")}
+    titles = {"ready": "Free to take", "open": "Not ready yet" if groups["ready"] else "Free",
+              "waiting": "Waiting on a decision"}
+    if not free:
+        lines += ["", "### Free (0)", "_Nothing._"]
+    for g, items in groups.items():
+        if items:
+            lines += ["", f"### {titles[g]} ({len(items)})"]
+            lines += [f"- #{i['n']} {cell(i['title'])}"
+                      + (f" · waiting on {cell(i['waits'])}" if i.get("waits") else "") for i in items]
     recent = list(reversed((state or {}).get("events") or []))[:8]
     if recent:
         lines += ["", "### Recent events"]
         lines += [f"- `{e['ts'][11:16]}` {cell(event_text(e, at=False))}" for e in recent]
     lines += ["", f"<sub>Updated {now.strftime('%Y-%m-%d %H:%M')} UTC by Devsprinter · "
-                  f"{thresholds(team)} · take a task with <code>/devsprinter:claim N</code></sub>"]
+                  f"{thresholds(team)} · take a task: write <code>/claim</code> in the issue, "
+                  f"or <code>/devsprinter:claim N</code> in Claude Code</sub>"]
     if state is not None:
         # < and > are escaped, so a title containing "-->" cannot end the HTML comment
         blob = json.dumps(state, ensure_ascii=False, separators=(",", ":"))
@@ -259,18 +360,72 @@ def render(issues: list[dict], now: datetime.datetime | None = None,
     return "\n".join(lines)
 
 
+# ---------- comment commands: what the Action does ----------
+
+def command_actions(issues: list[dict], team: dict | None = None,
+                    masters: list[str] | None = None) -> list[tuple[int, dict]]:
+    """[(issue number, action)] for every command in the fetched comments."""
+    team = config.clean_team(team)
+    masters = masters if masters is not None else team["sprintmasters"]
+    out = []
+    for i in issues:
+        if is_board(i):
+            continue
+        for a in commands.fold(i, masters, team["who_can_claim"], team["ready_label"])["actions"]:
+            out.append((i["number"], a))
+    return out
+
+
+def todo(issues: list[dict], team: dict | None = None, masters: list[str] | None = None,
+         prev: dict | None = None) -> list[tuple[int, dict]]:
+    """The actions not carried out yet. With no record of handled comments (first run, or a
+    board from before commands existed) nothing is done: old comments are not replayed."""
+    prev = prev if prev is not None else read_state(issues)
+    if not prev or not isinstance(prev.get("seen"), list):
+        return []
+    seen = set(prev["seen"])
+    return [(n, a) for n, a in command_actions(issues, team, masters) if a["comment"] not in seen]
+
+
+def act(repo: str, actions: list[tuple[int, dict]], masters: list[str]) -> list[str]:
+    """Carry out the actions with gh. Returns one line per action for the log."""
+    log = []
+    for n, a in actions:
+        do, who = a["do"], a.get("who") or ""
+        if do == "assign":
+            ok = gh("issue", "edit", str(n), "--repo", repo, "--add-assignee", who) is not None
+        elif do == "unassign":
+            ok = gh("issue", "edit", str(n), "--repo", repo, "--remove-assignee", who) is not None
+        elif do == "label":
+            ok = gh("issue", "edit", str(n), "--repo", repo, "--add-label", a["label"]) is not None
+        elif do == "reply":
+            text = commands.reply_text(a, masters)
+            ok = bool(text) and gh("issue", "comment", str(n), "--repo", repo,
+                                   body=REPLY_MARKER + "\n" + text) is not None
+        else:
+            continue
+        log.append(f"#{n} {do} {who}".strip() + ("" if ok else " (failed)"))
+    return log
+
+
 def build(issues: list[dict], now: datetime.datetime | None = None,
-          fallback: dict | None = None, team: dict | None = None) -> tuple[str, dict, list[dict]]:
+          fallback: dict | None = None, team: dict | None = None,
+          masters: list[str] | None = None) -> tuple[str, dict, list[dict]]:
     """(board text, new saved state, new events). `fallback` is used when the board issue has
     no saved state yet, e.g. the local dashboard's own previous snapshot."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
     now_ts = now.isoformat(timespec="seconds").replace("+00:00", "Z")
-    rows, _ = compute(issues, team)
+    rows, _ = compute(issues, team, masters)
     prev = read_state(issues) or fallback
     new = diff(prev, rows, {i["number"] for i in issues if not is_board(i)}, now_ts)
     events = ((prev or {}).get("events") or []) + new
-    state = {"v": 1, "rows": snapshot(rows), "events": events[-MAX_EVENTS:]}
-    return render(issues, now, state, team), state, new
+    # Every command comment seen so far, handled or not, so it is never carried out twice
+    seen = list((prev or {}).get("seen") or [])
+    known = set(seen)
+    seen += [a["comment"] for _, a in command_actions(issues, team, masters)
+             if a["comment"] and a["comment"] not in known and not known.add(a["comment"])]
+    state = {"v": 1, "rows": snapshot(rows), "events": events[-MAX_EVENTS:], "seen": seen[-MAX_SEEN:]}
+    return render(issues, now, state, team, masters), state, new
 
 
 def publish(repo: str, issues: list[dict], body: str) -> str:
@@ -289,10 +444,11 @@ def publish(repo: str, issues: list[dict], body: str) -> str:
 
 
 def export(repo: str, issues: list[dict], state: dict, new: list[dict],
-           now: datetime.datetime | None = None, team: dict | None = None) -> dict:
+           now: datetime.datetime | None = None, team: dict | None = None,
+           masters: list[str] | None = None) -> dict:
     """The state that feed.py, projects.py, dashboard.py and serve.py read."""
     now = now or datetime.datetime.now(datetime.timezone.utc)
-    rows, free = compute(issues, team)
+    rows, free = compute(issues, team, masters)
     return {"v": 1, "repo": repo, "generated": now.isoformat(timespec="seconds").replace("+00:00", "Z"),
             "rows": rows, "free": free, "events": state["events"], "new_events": new,
             "team": config.clean_team(team)}
@@ -304,6 +460,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--repo", required=True, help="owner/repo")
     ap.add_argument("--dry-run", action="store_true", help="only print the table, save nothing")
+    ap.add_argument("--act", action="store_true",
+                    help="carry out new comment commands (assign, reply, label); the Action uses this")
     ap.add_argument("--state-out", help="write the state and new events as JSON here")
     ap.add_argument("--html", help="write the static dashboard (one HTML file) here")
     ap.add_argument("--config", default=config.TEAM_FILE,
@@ -311,12 +469,20 @@ def main() -> None:
     args = ap.parse_args()
     team = config.team_at(".") if args.config == config.TEAM_FILE else \
         config.team_from_text(Path(args.config).read_text(encoding="utf-8"))
+    masters = config.sprintmasters(team, args.repo)
     issues = fetch(args.repo)
-    body, state, new = build(issues, team=team)
+    actions = todo(issues, team, masters)
+    if args.dry_run:
+        for n, a in actions:
+            print(f"Would do: #{n} {a['do']} {a.get('who') or a.get('label') or ''}".rstrip())
+    elif args.act and actions:
+        for line in act(args.repo, actions, masters):
+            print(line)
+    body, state, new = build(issues, team=team, masters=masters)
     print(STATE_RE.sub("", body).replace("\n\n## ", "\n## ", 1) if args.dry_run
           else publish(args.repo, issues, body))
     if args.state_out or args.html:
-        data = export(args.repo, issues, state, new, team=team)
+        data = export(args.repo, issues, state, new, team=team, masters=masters)
         if args.state_out:
             Path(args.state_out).write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
         if args.html:

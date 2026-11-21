@@ -1,19 +1,26 @@
 # Devsprinter board: keeps the pinned "Sprint board" issue current and, if they are turned on,
 # the views: feed to Discord/Slack, GitHub Projects and a static dashboard on Pages.
-# Event-driven (comments and assignees change), plus every hour to catch stale tasks.
+# Event-driven (comments, assignees, labels and linked PRs change), plus every hour to catch
+# stale tasks and PR reviews. It also carries out comment commands (/claim, /join, /done ...):
+# assigns the commenter, adds the ready label, or answers a refused command.
+# pull_request_target runs this file from the base branch and never checks out the PR's code:
+# the board only reads PRs through the API, so a stranger's PR can't run anything here.
 # Settings: see docs/views.md. Everything except the board is off until a secret/variable is set.
 name: Devsprinter board
 on:
   issue_comment:
     types: [created, edited, deleted]
   issues:
-    types: [opened, closed, reopened, assigned, unassigned]
+    types: [opened, closed, reopened, assigned, unassigned, labeled, unlabeled]
+  pull_request_target:
+    types: [opened, closed, reopened, edited, ready_for_review, converted_to_draft]
   schedule:
     - cron: "7 * * * *"
   workflow_dispatch:
 permissions:
   contents: read
   issues: write
+  pull-requests: read
 # Runs are queued rather than cancelled: a cancelled run could save the state before the feed
 # had sent its events. GitHub keeps only the latest one in the queue.
 concurrency:
@@ -21,19 +28,23 @@ concurrency:
   cancel-in-progress: false
 jobs:
   board:
-    # The board issue itself must not trigger a new run
-    if: github.event_name != 'issues' || !startsWith(github.event.issue.body, '<!-- devsprinter-board -->')
+    # The board issue itself and the board's own replies must not trigger a new run
+    if: >-
+      (github.event_name != 'issues' || !startsWith(github.event.issue.body, '<!-- devsprinter-board -->'))
+      && (github.event_name != 'issue_comment' || github.event.comment.user.type != 'Bot')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       pages: ${{ steps.pages.outputs.on }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - name: Board (the Sprint board issue)
-        run: python devsprinter/board.py --repo "${{ github.repository }}" --state-out state.json --html site/index.html
+        run: python devsprinter/board.py --repo "${{ github.repository }}" --act --state-out state.json --html site/index.html
         env:
           GH_TOKEN: ${{ github.token }}
       - name: View 1 – feed to Discord/Slack

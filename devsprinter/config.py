@@ -9,6 +9,21 @@ the hooks and the dashboard use the same values:
 - stale_minutes: no signal for this long and it is stale (someone should check on it).
 - ready_label: the label an issue needs before it can be started from the dashboard.
 
+Open sprints (anyone may join with a comment, a fork PR or any LLM) add, all optional:
+
+    {"sprintmasters": ["anna"], "who_can_claim": "anyone", "claim_stale_hours": 72,
+     "waiting_labels": {"board": "the board"}, "trusted": ["anna", "bo"],
+     "content_types": [".html", ".md", ".css"]}
+
+- sprintmasters: 1-2 accounts that approve work and may use /ready and /release @someone.
+  Empty: the repo owner.
+- who_can_claim: "anyone" (open communities) or "collaborators".
+- claim_stale_hours: a claim made with a comment (people, not agents) turns stale after this
+  long without a comment from that person.
+- waiting_labels: label -> who it waits on. The board lists those issues as waiting, not free.
+- trusted: accounts whose PRs the PR check does not hold back.
+- content_types: file endings a PR may change without being flagged. Empty: any type.
+
 Personal settings live in `~/.devsprinter/config.json` and never leave this computer:
 
     {"signal": "milestones", "push": true, "context": true, "launch": "auto", "worktrees": ""}
@@ -20,11 +35,15 @@ Every value is checked; a broken or missing file gives the defaults.
 import base64
 import json
 import os
+import re
 import subprocess
 from pathlib import Path
 
 TEAM_FILE = ".github/devsprinter.json"
-TEAM_DEFAULTS = {"quiet_minutes": 30, "stale_minutes": 240, "ready_label": "ready"}
+TEAM_DEFAULTS = {"quiet_minutes": 30, "stale_minutes": 240, "ready_label": "ready",
+                 "sprintmasters": [], "who_can_claim": "anyone", "claim_stale_hours": 72,
+                 "waiting_labels": {}, "trusted": [], "content_types": []}
+LOGIN_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$")
 # Ready-made choices for teams whose tasks are short, mixed or long: (quiet, stale) in minutes
 PRESETS = {"short": (10, 60), "mixed": (30, 240), "long": (60, 480)}
 LOCAL_DEFAULTS = {"signal": "milestones", "push": True, "context": True, "launch": "auto", "worktrees": ""}
@@ -54,7 +73,57 @@ def clean_team(raw) -> dict:
         stale = quiet + 1
     label = raw.get("ready_label", TEAM_DEFAULTS["ready_label"])
     label = " ".join(str(label).split())[:50] if isinstance(label, str) else TEAM_DEFAULTS["ready_label"]
-    return {"quiet_minutes": quiet, "stale_minutes": stale, "ready_label": label}
+    return {"quiet_minutes": quiet, "stale_minutes": stale, "ready_label": label,
+            "sprintmasters": _logins(raw.get("sprintmasters"))[:2],
+            "who_can_claim": "collaborators" if raw.get("who_can_claim") == "collaborators" else "anyone",
+            "claim_stale_hours": _int(raw.get("claim_stale_hours"), TEAM_DEFAULTS["claim_stale_hours"], 1, 24 * 60),
+            "waiting_labels": _waiting(raw.get("waiting_labels")),
+            "trusted": _logins(raw.get("trusted")),
+            "content_types": _types(raw.get("content_types"))}
+
+
+def _logins(value) -> list[str]:
+    """GitHub account names only (no @, no spaces), at most 50."""
+    if not isinstance(value, list):
+        return []
+    out = []
+    for v in value:
+        v = str(v).strip().lstrip("@") if isinstance(v, str) else ""
+        if LOGIN_RE.match(v) and v.lower() not in (o.lower() for o in out):
+            out.append(v)
+    return out[:50]
+
+
+def _waiting(value) -> dict:
+    if not isinstance(value, dict):
+        return {}
+    out = {}
+    for k, v in list(value.items())[:20]:
+        k = " ".join(str(k).split())[:50]
+        v = " ".join(str(v).split())[:40] if isinstance(v, str) else ""
+        if k:
+            out[k] = v or k
+    return out
+
+
+def _types(value) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out = []
+    for v in value[:30]:
+        v = str(v).strip().lower() if isinstance(v, str) else ""
+        v = v if v.startswith(".") else "." + v if v else ""
+        if re.fullmatch(r"\.[a-z0-9]{1,10}", v) and v not in out:
+            out.append(v)
+    return out
+
+
+def sprintmasters(team: dict, repo: str | None = None) -> list[str]:
+    """The sprintmasters, or the repo owner when none are set."""
+    masters = clean_team(team)["sprintmasters"]
+    if not masters and repo and "/" in repo:
+        masters = [repo.split("/", 1)[0]]
+    return masters
 
 
 def team_from_text(text: str | None) -> dict:

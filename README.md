@@ -33,10 +33,12 @@ Allt arbete finns som issues. Den fästa issuen **Sprint board** visar vem som h
 | `text` | Skriv eller ändra text. |
 | `styrelsen` | Behöver ett svar eller ett beslut från styrelsen. Alla får tycka till i kommentarerna. |
 
-1. **Ta en uppgift.** Skriv "Jag tar den" i issuen. Sprintmastern ser till att den syns som din på tavlan.
+1. **Ta en uppgift.** Skriv `/claim` först på en rad i issuen. Då blir den din och syns på tavlan. Fler kommandon: `/join` (vara med på en uppgift som någon annan har, till exempel en granskning), `/waiting @namn` (du väntar på någon), `/back`, `/done` och `/release`.
 2. **Ge feedback** i issuen. Hänvisa till numren i mockuperna (A1, B3 …), till exempel "A3: Utveckling känns för formellt".
 3. **Ändra text** i en pull request: gör en fork av repot (knappen *Fork* uppe till höger), ändra i en egen gren och öppna en pull request hit. Skriv "Fixes #17" i beskrivningen, så kopplas den till issuen. Sprintmastern (Jonathan) granskar och godkänner.
-4. **Med Claude Code?** Installera Devsprinter-pluginet och skriv `/devsprinter:claim 12`. Då syns din agents framsteg på issuen av sig själv.
+4. **Med en AI-agent?** Öppna repot i den (Claude Code, Codex, Cursor, Copilot …). Den läser `AGENTS.md` och vet hur sprinten fungerar. Med Claude Code och Devsprinter-pluginet syns agentens framsteg på issuen av sig själv.
+
+Varje pull request får en automatisk kontroll som pekar ut dold text, skript och ändringar i filer utanför texterna. Läs mer om säkerheten i `AGENTS.md`.
 
 Där det står **TBC** saknas ett svar från styrelsen. Frågorna finns samlade sist i dokumentet och som issues med etiketten `styrelsen`.
 
