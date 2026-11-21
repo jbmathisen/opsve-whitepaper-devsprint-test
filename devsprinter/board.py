@@ -49,7 +49,7 @@ issues(states:OPEN,first:100,orderBy:{field:UPDATED_AT,direction:DESC}){nodes{
 id number title body isPinned assignees(first:10){nodes{login}} labels(first:20){nodes{name}}
 comments(last:50){nodes{id createdAt authorAssociation author{__typename login} body}}}}
 pullRequests(states:OPEN,first:50,orderBy:{field:UPDATED_AT,direction:DESC}){nodes{
-number isDraft reviewDecision author{login} closingIssuesReferences(first:10){nodes{number}}}}}}"""
+number title url isDraft reviewDecision author{login} closingIssuesReferences(first:10){nodes{number}}}}}}"""
 STATE_LABEL = {"active": "🟢 active", "claimed": "🙋 claimed", "quiet": "🟡 quiet",
                "assigned": "⚪ assigned", "waiting": "⏳ waiting", "review": "👀 in review",
                "changes": "✏️ changes asked", "stale": "🔴 stale", "done": "✅ done"}
@@ -80,14 +80,20 @@ def gh(*args: str, body: str | None = None) -> str | None:
 
 
 def fetch(repo: str) -> list[dict]:
+    return fetch_all(repo)[0]
+
+
+def fetch_all(repo: str) -> tuple[list[dict], list[dict]]:
+    """(open issues with their linked PRs attached, all open PRs)."""
     owner, name = repo.split("/", 1)
     out = gh("api", "graphql", "-f", f"query={QUERY}", "-F", f"owner={owner}", "-F", f"name={name}")
     if out is None:
         raise SystemExit(f"Could not read the issues of {repo} (is gh logged in?).")
     data = json.loads(out)["data"]["repository"]
     issues = data["issues"]["nodes"]
-    link_prs(issues, (data.get("pullRequests") or {}).get("nodes") or [])
-    return issues
+    prs = (data.get("pullRequests") or {}).get("nodes") or []
+    link_prs(issues, prs)
+    return issues, prs
 
 
 def link_prs(issues: list[dict], prs: list[dict]) -> None:
