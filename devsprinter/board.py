@@ -478,6 +478,11 @@ def main() -> None:
     elif args.act and actions:
         for line in act(args.repo, actions, masters):
             print(line)
+        # Changes made with the Action's own token start no new run, so show them now
+        by_n = {i["number"]: i for i in issues}
+        for n, a in actions:
+            if a["do"] == "label" and n in by_n:
+                by_n[n].setdefault("labels", {}).setdefault("nodes", []).append({"name": a["label"]})
     body, state, new = build(issues, team=team, masters=masters)
     print(STATE_RE.sub("", body).replace("\n\n## ", "\n## ", 1) if args.dry_run
           else publish(args.repo, issues, body))

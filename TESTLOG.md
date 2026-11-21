@@ -48,6 +48,18 @@ Proposal for R1–R7: `docs/proposal-open-sprint.md` in the Devsprinter repo.
 
 | # | | Date | Finding | Export |
 |---|---|---|---|---|
+| F1 | ✅ | 11-21 | **Devsprinter 0.6 deployed** (branch `feature/open-sprint`): comment commands, PRs linked with `Fixes #N`, grouped board, PR check, `AGENTS.md`. Settings: @jbmathisen as sprintmaster, `styrelsen` as a waiting label, content types .html .md .css. 115 unit tests pass. | |
+| F2 | ✅ | 11-21 | **The grouped board works live:** *Free to take (7)*, *Not ready yet (2)*, *Waiting on a decision (11)* with "waiting on styrelsen". Fixes S12. | |
+| F3 | ❌→✅ | 11-21 | **Git Bash on Windows turned `/claim` into `C:/Program Files/Git/claim`** when sent with `gh issue comment --body "/claim"` (MSYS path conversion), so the command was lost without an error. `AGENTS.md` now sends commands through stdin: `echo "/claim" \| gh issue comment 12 --body-file -`. Any agent on Windows would have hit this. | export |
+| F4 | ✅ | 11-21 | **`/claim` → assigned, 🙋 claimed on the board and a "took #19" event; `/waiting styrelsen` → ⏳ waiting on styrelsen; `/release` → unassigned, free, and a "released" event.** Each took one run of about 20–40 s. | |
+| F5 | ✅ | 11-21 | **A PR with `Fixes #19` moved #19 to 👀 in review, waiting on @jbmathisen**, and back to free when the PR was closed. | |
+| F6 | ❌→✅ | 11-21 | **The PR check failed on its first live run:** `gh pr view` has no `authorAssociation` field. The unit tests never call `gh` for real, so they didn't catch it. Fixed by reading it from the REST API. 💡 Devsprinter needs a small live smoke test against a test repo before a release. | export |
+| F7 | ✅ | 11-21 | **The PR check found all four planted problems** (an HTML comment, text aimed at an AI, `display:none`, a new `.claude/settings.json`), quoted none of them, started with the notice, and passed because the author is trusted. One comment, updated in place. | |
+| F8 | ⚠️ | 11-21 | `pull_request_target` runs started about 20 s after the PR was opened. Fine, but someone watching may think nothing happened. | |
+| F9 | ⚠️ | 11-21 | Changes made with the Action's own token (assign, label) start no new run. That avoids loops, but `/ready` showed the task as "Not ready yet" until the next event. Fixed: the board applies the label in the same run. | export |
+| F10 | ⚠️ | 11-21 | PR reviews (approve, changes requested) don't start the board: `pull_request_review` from a fork gets a read-only token. The hourly run catches them, so *changes asked* can lag up to an hour. | export |
+| F11 | 💡 | 11-21 | The sprintmaster's own PR says "waiting on @jbmathisen", i.e. on themself. It should say "ready to merge". | export |
+| F12 | ⏳ | 11-21 | **Not tested yet, needs a second account or the first contributor:** a refused `/claim`, assigning someone who isn't a collaborator, `/join`, `/ready`, a PR from a fork, and the check failing for someone who isn't trusted. | |
 
 ## Wrap-up
 
