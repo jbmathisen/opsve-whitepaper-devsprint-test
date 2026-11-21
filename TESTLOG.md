@@ -38,7 +38,9 @@ Responses to S5–S7. These change what Devsprinter is: from "a Claude Code plug
 
 | R6 | **Safe AI review of PRs from strangers.** The sprintmaster wants to review PRs with their own AI. Text in a fork's PR (diff, description, HTML comments, hidden text, file names) can carry instructions to that AI. A checked-out branch can also change `CLAUDE.md`, `AGENTS.md`, `.claude/settings.json` (hooks run code) and `.github/workflows/`. Devsprinter's setup should add `CODEOWNERS` for those paths, offer a read-only check that flags hidden text and changes outside content files, and its review instructions should read PRs with `gh pr diff`, never by checking them out. | export |
 
-Proposal for R1–R5: `docs/proposal-open-sprint.md` in the Devsprinter repo.
+| R7 | **Trust profiles in setup.** Public or private, and trusted, known or open contributors, with a plain explanation of each and the settings that follow. The owner decides how much to trust people, and can raise named people. The safety notice for PR review is always included, not something to remember. The goal is a smooth start and a smooth sprint. | export |
+
+Proposal for R1–R7: `docs/proposal-open-sprint.md` in the Devsprinter repo.
 
 ## Sprint
 
