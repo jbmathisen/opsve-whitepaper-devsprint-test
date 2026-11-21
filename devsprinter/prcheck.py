@@ -178,12 +178,14 @@ def main() -> None:
     team = config.team_at(".") if args.config == config.TEAM_FILE else \
         config.team_from_text(Path(args.config).read_text(encoding="utf-8"))
     masters = config.sprintmasters(team, args.repo)
-    view = gh("pr", "view", str(args.pr), "--repo", args.repo,
-              "--json", "author,authorAssociation,title,body,files,commits")
+    view = gh("pr", "view", str(args.pr), "--repo", args.repo, "--json", "author,title,body,files,commits")
     diff = gh("pr", "diff", str(args.pr), "--repo", args.repo)
+    # `gh pr view` has no author association; the REST API does
+    assoc = gh("api", f"repos/{args.repo}/pulls/{args.pr}", "--jq", ".author_association")
     if view is None or diff is None:
         raise SystemExit(f"Could not read PR #{args.pr} of {args.repo}.")
     pr = json.loads(view)
+    pr["authorAssociation"] = (assoc or "").strip()
     author = (pr.get("author") or {}).get("login") or "?"
     files = [f.get("path") or "" for f in pr.get("files") or []]
     texts = {"PR title": pr.get("title") or "", "PR description": pr.get("body") or ""}

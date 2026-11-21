@@ -20,7 +20,7 @@ This repo runs an open sprint with [Devsprinter](https://github.com/jbmathisen/d
 | `/done` | Finished, waiting for the sprintmaster. |
 | `/release` | You let go of it. |
 
-With `gh`: `gh issue comment 12 --body "/claim"`. Without tools, tell your person what to write.
+With `gh`, send the command through stdin: `echo "/claim" | gh issue comment 12 --body-file -`. (Don't use `--body "/claim"`: Git Bash on Windows turns `/claim` into a file path.) Without tools, tell your person what to write.
 With Claude Code and the Devsprinter plugin, `/devsprinter:claim 12` does the same and also shows your plan's progress on the issue.
 
 ## Deliver
